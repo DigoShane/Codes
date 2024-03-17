@@ -1,0 +1,45 @@
+My original post under "DiscoursePost4.py" had a vauge answer form Dokken. So i decided to ask a followup question asking for clarification.
+At this time, I was having some issue reading the documentation for ufl. So i decided to post some questions there. I ended up removing it.
+I think its better to ask in a separate thread.
+
+The following is what i removed from the original post.
+Check the following url
+"https://fenicsproject.discourse.group/t/implementing-gradient-descent-in-fenics/13761"
+
+
+==============================================================================
+This is a side note/ side doubt, but something that is very helpful cause I think it would help me find answers myself; so less stupid questions for you guys to deal with. It is with regards to reading the documentation for ufl. I'll number the questions, but they are consecutive.
+
+1. The command "derivative" doesn't show up in the documentation for commands. 
+
+     I printed the version of ufl I'm using (I think the following is correct)
+     ```
+     Import ufl 
+     print(f" UFL version: {ufl.__version__}")
+     ```
+     and it returned
+     ```UFL version: 2019.1.0```
+
+     So I googled the documentation for [UFL 2019.1.0](https://fenics.readthedocs.io/projects/ufl/en/2019.1.0/index.html) and searched "derivative" and got [this](https://fenics.readthedocs.io/projects/ufl/en/2019.1.0/api-doc/ufl.algorithms.html?highlight=derivative#module-ufl.algorithms.apply_derivatives). It mentions different types of derivatives, but I can't find 'derivative' as in the command 'derivative' in the first example in [this page of the ufl manual](https://fenics.readthedocs.io/projects/ufl/en/2019.1.0/manual/form_language.html#automatic-functional-differentiation). I'm not sure if I misunderstand the documentation under [API reference](https://fenics.readthedocs.io/projects/ufl/en/2019.1.0/api-doc/ufl.html).
+
+2. Not clear what the commands described in the ufl documentation mean.
+
+     I would also like to ask what the documentation for ufl actually means. For example consider the command " [`ufl.algorithms.apply_derivatives.` `CoordinateDerivativeRuleset`](https://fenics.readthedocs.io/projects/ufl/en/2019.1.0/api-doc/ufl.algorithms.html#ufl.algorithms.apply_derivatives.CoordinateDerivativeRuleset)". It says it needs " *coefficients* , *arguments* , *coefficient_derivatives*". While i understand the first two, the last one is not clear. What is "coefficient_derivavative", i couldn't find it anywhere in the manual. Below the definition are some "keywords",
+
+     `argument` (*o* )
+
+     `coefficient` (*o* )
+
+     `geometric_quantity` (*o* )
+
+     `grad` (*o* )
+
+     `jacobian` (*o* )
+
+     `reference_grad` (*g* )
+
+     `reference_value` (*o* )
+
+     `spatial_coordinate` (*o* )
+
+     what are these? What is the 'o' in the argument of these keywords? How are they related to the `ufl.algorithms.apply_derivatives.CoordinateDerivativeRuleset`?

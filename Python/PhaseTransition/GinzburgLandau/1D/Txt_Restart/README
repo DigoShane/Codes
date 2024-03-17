@@ -1,0 +1,14 @@
+The codes this this folder were written such that they an be stopped (using a relaxation parameter and absolute tolerance),
+their output stored in a .csv file. These are the values at the nodes. This can then be read into the code as initial guess
+for the next set of runs. 
+
+The issue is that this method tends to fail when the output function is very jaggedy. The residue
+for the restarted function tends to be higher than the residue reported in the last ouput. 
+There is some issue that we need to deal with.
+
+1. The only code that converges is the GinzburgLandau-1D.py code.
+   Its not like the read write was the solution. Turns out that we just needed the relaxation scheme.
+2. I couldnt get "*-Constraint.py" to read in the value of the lagrange multiplier.
+3. The '*-Constraint2.py' code read in the right value at the nodes; I plotted the initial guess to check. However the residue would immediately jump to a higher value.
+   I was facing the same issue with "GinzburgLandau-1D.py" code. However, there we didnt need to restrart the code. 
+   Here however, the penalty is causing the residue to jump to a huge number.

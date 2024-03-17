@@ -1,0 +1,11 @@
+This is a text document that contains interesting things that:-
+1. Tensordot(a,b,.)
+   The above function can be used to multiply two tensors together. It can also be used to multiply Matrices and tensors, 
+   eg:-
+   In the following, We have i,j,k,l varying from 1 to 3 while a,b,c varying form 1 to 2.
+   E_{ij}=C^{ijkb}F_{kb}
+   Thus we have C\in R^{3x3x3x2} and F\in R^{3x2}
+   This has been done in "Test_ArrayArgFunction". Search !!sDs!! 
+   (Meaning available in newLaptop Books/Computational Work/Commenting etiquettes)
+   The interesting thing is that the multiplication only worked when i had C[:,:,:,0:2]F[:,0:2] even though the last
+   argument doesnt go till 2.

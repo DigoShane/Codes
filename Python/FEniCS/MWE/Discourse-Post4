@@ -1,0 +1,62 @@
+#This is what i posted to FEniCS Discourse
+
+I want to implement a Gradient Descent Algorithm in FEniCS. 
+I am working in 1D (if this works out I can move onto 2D). 
+
+
+My idea is that given any functional 
+$\int_{\Omega}\varphi(y,y',y'') dx,$
+where $\varphi$ can be non-convex. The reason non convex is important is that I need the ability to choose an initial condition. 
+
+I want to plug in my Finite Element approximation scheme into the above expression for the energy. This will give me a discretized problem on which i can apply gradient descent.
+
+
+By the Finite Eelment approximation, I mean any admissible function can be written as
+$y(x)=\sum_i \hat{y}_i N_i(x)$, where $\hat{y}_i$ denotes the values at the nodes.  
+
+If i plug in the above, I get a discrete version of the energy which depends on the values of the nodes.
+This is a discrete problem on which I can use Gradient descent. 
+
+
+The gradient descent step is given by
+
+$y^{n+1}=y^n-\alpha \partial_y \hat{E}(y^n)$
+
+What i need is \partial_y \hat{E}(y^n). I wrote part of the Gradient Descent code which achieves this.
+
+MWE:-
+```
+<paste code here>
+```
+
+==========================================================================================================================================
+I keep getting the following error message:
+
+
+```
+Traceback (most recent call last):
+  File "/Users/DigoSen/Desktop/Books/Codes/Python/FEniCS/MWE/Discourse-Post4.py", line 38, in <module>
+    F0 = dolfin.cpp.fem.assemble(F)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: assemble(): incompatible function arguments. The following argument types are supported:
+    1. (arg0: dolfin::GenericTensor, arg1: dolfin.cpp.fem.Form) -> None
+    2. (arg0: dolfin.cpp.fem.Form) -> float
+
+Invoked with: Form([Integral(CoefficientDerivative(Power(Sum(IntValue(1), Product(IntValue(-1), Coefficient(FunctionSpace(Mesh(VectorElement(FiniteElement('Lagrange', interval, 1), dim=1), 0), FiniteElement('Lagrange', interval, 1)), 5))), IntValue(2)), ExprList(*(Coefficient(FunctionSpace(Mesh(VectorElement(FiniteElement('Lagrange', interval, 1), dim=1), 0), FiniteElement('Lagrange', interval, 1)), 5),)), ExprList(*(Argument(FunctionSpace(Mesh(VectorElement(FiniteElement('Lagrange', interval, 1), dim=1), 0), FiniteElement('Lagrange', interval, 1)), 0, None),)), ExprMapping(*())), 'cell', Mesh(VectorElement(FiniteElement('Lagrange', interval, 1), dim=1), 0), 'everywhere', {}, None)])
+```
+
+I am using dolfin version 2019.1.0, which i installed using conda-forge.
+
+
+******************************************************************************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+I got a response from Dokken on FEniCS Discourse. I posted a followup.
+
+Check the url
+"https://fenicsproject.discourse.group/t/implementing-gradient-descent-in-fenics/13761"
+
+IMP -> There is also an important modificiation that I made to the question, 
+       I have saved it to post later. Possibly after checking that this isnt repeated.
+       Check the file named "SideQuestion-FromDiscourse-Post4"
+
+

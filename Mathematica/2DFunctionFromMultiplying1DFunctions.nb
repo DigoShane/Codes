@@ -1,0 +1,1147 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     42553,       1139]
+NotebookOptionsPosition[     40630,       1102]
+NotebookOutlinePosition[     41025,       1118]
+CellTagsIndexPosition[     40982,       1115]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Creating a 2D function from 2 1D Functions", "Title",
+ CellChangeTimes->{{3.8659683761876993`*^9, 
+  3.865968403581677*^9}},ExpressionUUID->"836c6215-9bb9-4292-98e6-\
+56a3cca5f14a"],
+
+Cell[BoxData[
+ StyleBox[
+  RowBox[{
+   RowBox[{
+    StyleBox[
+     RowBox[{"(", "*"}]], 
+    RowBox[{
+     RowBox[{
+      RowBox[{"We", " ", "have", " ", "two", " ", 
+       RowBox[{"functions", " ", "'"}], 
+       RowBox[{"h", "'"}], " ", 
+       RowBox[{"and", " ", "'"}], 
+       RowBox[{"g", "'"}], " ", "which", " ", "satisfy", " ", "the", " ", 
+       "condition", "\[IndentingNewLine]", "h", 
+       RowBox[{"(", "0", ")"}]}], "=", 
+      RowBox[{"1", "=", 
+       RowBox[{"g", 
+        RowBox[{"(", "0", ")"}], "\[IndentingNewLine]", "We", " ", "want", 
+        " ", "a", " ", "2", "D", " ", "function", " ", "that", " ", "can", 
+        " ", "be", " ", "thought", " ", "of", " ", "as", " ", "multiplying", 
+        " ", "the", " ", "two", " ", "functions", " ", 
+        RowBox[{
+        "together", ".", " ", "\[IndentingNewLine]", "Specifically"}]}]}]}], 
+     ",", " ", 
+     RowBox[{
+     "if", " ", "the", " ", "2", "D", " ", "function", " ", "is", " ", "f", 
+      RowBox[{"(", 
+       RowBox[{"x", ",", "y"}], ")"}], " ", "then", " ", "the", " ", 
+      "function", " ", "restricted", " ", "along", " ", "two", " ", 
+      "different", " ", "axes", " ", "are", " ", "h", " ", "and", " ", "g", 
+      " ", 
+      RowBox[{"respectively", ".", " ", "\[IndentingNewLine]", "These"}], " ",
+       "two", " ", "axes", " ", "are", " ", "angled", " ", "to", " ", "each", 
+      " ", 
+      RowBox[{"other", ".", " ", "\[IndentingNewLine]", "WLOG"}], " ", "we", 
+      " ", "can", " ", "assume", " ", "that", " ", "one", " ", "of", " ", 
+      "the", " ", "axes", " ", "is", " ", "the", " ", "y", " ", 
+      RowBox[{"axis", ".", " ", "Let"}], " ", "the", " ", "other", " ", 
+      "axis", " ", "have", " ", "angle", " ", "\[Theta]", " ", "wrt", " ", 
+      "the", " ", "x", " ", 
+      RowBox[{"axis", "."}]}]}], 
+    StyleBox[
+     RowBox[{"*", ")"}]]}], "\[IndentingNewLine]", 
+   RowBox[{
+    StyleBox[
+     RowBox[{"(", "*"}]], 
+    RowBox[{
+     RowBox[{
+     "If", " ", "we", " ", "call", " ", "this", " ", "axis", " ", "as", " ", 
+      "u"}], ",", " ", 
+     RowBox[{
+      RowBox[{
+      "then", " ", "we", " ", "can", " ", "define", " ", "another", " ", 
+       "axis", " ", "v", " ", "orthogonal", "  ", "to", " ", "u", " ", 
+       RowBox[{"s", ".", "t", ".", " ", "we"}], " ", "have", " ", "the", " ", 
+       "following", " ", "relation", "\[IndentingNewLine]", "        ", "u"}],
+       "=", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"x", " ", "cos\[Theta]"}], "+", 
+        RowBox[{"ysin\[Theta]", "\[IndentingNewLine]", "v"}]}], "=", 
+       RowBox[{
+        RowBox[{"-", "xsin\[Theta]"}], "+", "ycos\[Theta]"}]}]}]}], 
+    "\[IndentingNewLine]", 
+    StyleBox[
+     RowBox[{"*", ")"}]]}]}], "Text"]], "Input",
+ CellChangeTimes->{{3.865968406541894*^9, 3.865968506810115*^9}, {
+  3.8659687657101994`*^9, 3.8659688306781187`*^9}, {3.865968910335629*^9, 
+  3.865968928105447*^9}, {3.8659690007133303`*^9, 3.865969078252124*^9}, {
+  3.865969108379498*^9, 3.865969200877965*^9}, {3.865969239249632*^9, 
+  3.865969505970477*^9}, {3.865969540998784*^9, 
+  3.865969589999078*^9}},ExpressionUUID->"f5807350-7fb2-4c6e-9d7e-\
+576435ff7568"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   StyleBox["(*", "Text"], 
+   RowBox[{
+    StyleBox[
+     RowBox[{
+      RowBox[{
+       RowBox[{"f", 
+        RowBox[{"(", 
+         RowBox[{"x", ",", "y"}], ")"}], " ", "along", " ", "the", " ", "u", 
+        " ", "axis", " ", "is", " ", "h", 
+        RowBox[{"(", "u", ")"}]}], "\[IndentingNewLine]", 
+       RowBox[{"f", 
+        RowBox[{"(", 
+         RowBox[{"x", ",", "y"}], ")"}], " ", "along", " ", "the", " ", "y", 
+        " ", "axis", " ", "is", " ", "g", 
+        RowBox[{"(", "y", ")"}]}], "\[IndentingNewLine]", "The", " ", 
+       "equation", " ", "for", " ", "the", " ", "u", " ", "axis", " ", "is", 
+       " ", "\[IndentingNewLine]", "v"}], "=", 
+      RowBox[{"0", "=", 
+       RowBox[{
+        RowBox[{">", "xsin\[Theta]"}], "=", 
+        RowBox[{"ycos\[Theta]", "=", 
+         RowBox[{
+          RowBox[{">", "y"}], "=", 
+          RowBox[{
+          "xtan\[Theta]", "\[IndentingNewLine]", "Putting", " ", "this", " ", 
+           "conditions", " ", "in"}]}]}]}]}]}], "Text"], 
+    StyleBox[",", "Text"], 
+    StyleBox[" ", "Text"], 
+    RowBox[{
+     StyleBox[
+      RowBox[{"we", " ", "get", "\[IndentingNewLine]", "f", 
+       RowBox[{"(", 
+        RowBox[{"x", ",", "tan\[Theta]x"}], ")"}]}], "Text"], 
+     StyleBox["=", "Text"], 
+     RowBox[{
+      StyleBox[
+       RowBox[{"h", 
+        RowBox[{"(", "u", ")"}]}], "Text"], 
+      StyleBox["=", "Text"], 
+      RowBox[{
+       RowBox[{
+        StyleBox["h", "Text"], 
+        RowBox[{
+         StyleBox["(", "Text"], 
+         StyleBox[
+          RowBox[{"xcos\[Theta]", "+", "ysin\[Theta]"}], "Text"], ")"}]}], 
+       "=", 
+       RowBox[{
+        RowBox[{"h", 
+         RowBox[{"(", 
+          RowBox[{"xcos\[Theta]", "+", 
+           RowBox[{"xtan\[Theta]", " ", "sin\[Theta]"}]}], ")"}], 
+         "\[IndentingNewLine]", "f", 
+         RowBox[{"(", 
+          RowBox[{"x", ",", "tan\[Theta]x"}], ")"}]}], "=", 
+        RowBox[{
+         RowBox[{"h", 
+          RowBox[{"(", "xsec\[Theta]", ")"}], "\[IndentingNewLine]", "f", 
+          RowBox[{"(", 
+           RowBox[{"0", ",", "y"}], ")"}]}], "=", 
+         RowBox[{
+          RowBox[{"g", 
+           RowBox[{"(", "y", ")"}], "\[IndentingNewLine]", "We", " ", 
+           "suppose", " ", "\[IndentingNewLine]", "f", 
+           RowBox[{"(", 
+            RowBox[{"x", ",", "y"}], ")"}]}], "=", 
+          RowBox[{
+           RowBox[{"h", 
+            RowBox[{"(", "xsec\[Theta]", ")"}], "c", 
+            RowBox[{"(", "x", ")"}], "g", 
+            RowBox[{"(", "y", ")"}], "\[IndentingNewLine]", "Imposing", " ", 
+            "the", " ", "above", " ", "conditions", " ", "give", " ", "us", 
+            "\[IndentingNewLine]", "f", 
+            RowBox[{"(", 
+             RowBox[{"x", ",", 
+              RowBox[{"tan\[Theta]", " ", "x"}]}], ")"}]}], "=", 
+           RowBox[{
+            RowBox[{"h", 
+             RowBox[{"(", 
+              RowBox[{"sec\[Theta]", " ", "x"}], ")"}], "c", 
+             RowBox[{"(", "x", ")"}], "g", 
+             RowBox[{"(", 
+              RowBox[{"tan\[Theta]", " ", "x"}], ")"}]}], "=", 
+            RowBox[{
+             RowBox[{"h", 
+              RowBox[{"(", 
+               RowBox[{"sec\[Theta]", " ", "x"}], ")"}], 
+              "\[IndentingNewLine]", "which", " ", "gives", " ", "us", " ", 
+              "c", 
+              RowBox[{"(", "x", ")"}]}], "=", 
+             RowBox[{
+              RowBox[{"1", "/", "g"}], 
+              RowBox[{"(", 
+               RowBox[{"tan\[Theta]", " ", "x"}], ")"}], 
+              "\[IndentingNewLine]", "Plugging", " ", "this", " ", "back", 
+              " ", "in"}]}]}]}]}]}]}]}]}]}], ",", " ", 
+    RowBox[{
+     RowBox[{"we", " ", "get", "\[IndentingNewLine]", "f", 
+      RowBox[{"(", 
+       RowBox[{"x", ",", "y"}], ")"}]}], "=", 
+     RowBox[{
+      RowBox[{
+       FractionBox[
+        RowBox[{"h", 
+         RowBox[{"(", "xsec\[Theta]", ")"}]}], 
+        RowBox[{"g", 
+         RowBox[{"(", 
+          RowBox[{"tan\[Theta]", " ", "x"}], ")"}]}]], "g", 
+       RowBox[{"(", "y", ")"}], "\[IndentingNewLine]", "The", " ", "second", 
+       " ", "condition", " ", "applied", " ", "to", " ", "the", " ", "above", 
+       " ", "gives", " ", "us", "\[IndentingNewLine]", "f", 
+       RowBox[{"(", 
+        RowBox[{"0", ",", "y"}], ")"}]}], "=", 
+      RowBox[{
+       RowBox[{"h", 
+        RowBox[{"(", "0", ")"}], 
+        FractionBox[
+         RowBox[{"g", 
+          RowBox[{"(", "y", ")"}]}], 
+         RowBox[{"g", 
+          RowBox[{"(", "0", ")"}]}]]}], "=", 
+       RowBox[{
+        RowBox[{"g", 
+         RowBox[{"(", "y", ")"}], "\[IndentingNewLine]", "where", " ", "we", 
+         " ", "used", " ", "the", " ", "condition", " ", "that", " ", "h", 
+         RowBox[{"(", "0", ")"}]}], "=", 
+        RowBox[{
+         RowBox[{"g", 
+          RowBox[{"(", "0", ")"}]}], "=", "1."}]}]}]}]}]}], 
+   "\[IndentingNewLine]", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   StyleBox["\[IndentingNewLine]",
+    FontWeight->"Bold",
+    FontColor->RGBColor[1, 0, 0]], 
+   RowBox[{
+    StyleBox[
+     RowBox[{
+      RowBox[{
+      "The", " ", "function", " ", "of", " ", "interest", " ", "that", " ", 
+       "we", " ", "will", " ", "study", " ", "different", " ", "cases", " ", 
+       "of", " ", "is", " ", "thus", " ", "given", " ", "by", 
+       "\[IndentingNewLine]", "f", 
+       RowBox[{"(", 
+        RowBox[{"x", ",", "y"}], ")"}]}], "=", 
+      RowBox[{
+       RowBox[{"h", 
+        RowBox[{"(", "xsec\[Theta]", ")"}], "g", 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{
+           StyleBox["tan\[Theta]",
+            FontWeight->"Bold"], " ", 
+           StyleBox["x",
+            FontWeight->"Bold"]}], ")"}], 
+         RowBox[{"-", "1"}]], "g", 
+        RowBox[{"(", "y", ")"}], "\[IndentingNewLine]", "Notice", " ", "that",
+         " ", "when", " ", "\[Theta]"}], "=", "0"}]}],
+     FontWeight->"Bold",
+     FontColor->GrayLevel[0]], 
+    StyleBox[",",
+     FontWeight->"Bold",
+     FontColor->GrayLevel[0]], 
+    StyleBox[",",
+     FontWeight->"Bold",
+     FontColor->GrayLevel[0]], 
+    StyleBox[" ",
+     FontWeight->"Bold",
+     FontColor->GrayLevel[0]], 
+    RowBox[{
+     StyleBox[
+      RowBox[{"we", " ", "get", "\[IndentingNewLine]", "f", 
+       RowBox[{"(", 
+        RowBox[{"x", ",", "y"}], ")"}]}],
+      FontWeight->"Bold",
+      FontColor->GrayLevel[0]], 
+     StyleBox["=",
+      FontWeight->"Bold",
+      FontColor->GrayLevel[0]], 
+     RowBox[{
+      RowBox[{
+       StyleBox["h",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[
+        RowBox[{"(", "x", ")"}],
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["g",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       SuperscriptBox[
+        RowBox[{"(", 
+         StyleBox["0",
+          FontWeight->"Bold",
+          FontColor->GrayLevel[0]], ")"}], 
+        RowBox[{"-", "1"}]], 
+       StyleBox["g",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[
+        RowBox[{"(", "y", ")"}],
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["\[IndentingNewLine]",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["Which",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[" ",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["reduces",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[" ",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["to",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[" ",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["the",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[" ",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["expected",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["\[IndentingNewLine]",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["f",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[
+        RowBox[{"(", 
+         RowBox[{"x", ",", "y"}], ")"}],
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]]}], 
+      StyleBox["=",
+       FontWeight->"Bold",
+       FontColor->GrayLevel[0]], 
+      StyleBox[
+       RowBox[{"h", 
+        RowBox[{"(", "x", ")"}], "g", 
+        RowBox[{"(", "y", ")"}]}],
+       FontWeight->"Bold",
+       FontColor->GrayLevel[0]]}]}]}], "\[IndentingNewLine]", 
+   "*)"}]}]], "Input",
+ CellChangeTimes->{{3.865969595343453*^9, 3.865969670406551*^9}, {
+  3.865969733420332*^9, 3.8659698330612926`*^9}, {3.865969873527381*^9, 
+  3.8659700025283203`*^9}, {3.8659700458963823`*^9, 3.865970280499873*^9}, {
+  3.865970335163926*^9, 3.8659704376343517`*^9}, {3.865970858603745*^9, 
+  3.865970877449861*^9}, {3.865984389971221*^9, 3.865984484933062*^9}, {
+  3.865984651894456*^9, 3.86598476933573*^9}, {3.865984806041931*^9, 
+  3.86598482019804*^9}},ExpressionUUID->"c551a59e-3a42-4ffe-b213-\
+741bdd03ba4e"],
+
+Cell[BoxData[
+ RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.865968298894437*^9, 3.8659683089379053`*^9}},
+ CellLabel->
+  "In[2041]:=",ExpressionUUID->"9dd72327-2cae-49bd-adcf-04f807c2aa44"],
+
+Cell[BoxData[
+ RowBox[{"(*", 
+  RowBox[{
+   RowBox[{
+   "Testing", " ", "out", " ", "the", " ", "case", " ", "of", " ", "theta"}], 
+   "=", "0"}], "*)"}]], "Input",
+ CellChangeTimes->{{3.865985352005077*^9, 
+  3.865985363081112*^9}},ExpressionUUID->"fbc62d47-6c77-4959-ab64-\
+6317e4727136"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"h", "[", 
+   RowBox[{"x_", ",", "a_", ",", "b_"}], "]"}], ":=", 
+  RowBox[{"(", 
+   RowBox[{
+    RowBox[{
+     FractionBox["1", "4"], "*", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       FractionBox["x", "10"], ")"}], "4"]}], "-", 
+    RowBox[{
+     FractionBox["a", "3"], "*", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       FractionBox["x", "10"], ")"}], "3"]}], "+", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"b", "+", 
+       FractionBox["1", "4"]}], ")"}], "*", 
+     FractionBox[
+      SuperscriptBox["a", "2"], "2"], "*", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       FractionBox["x", "10"], ")"}], "2"]}], "+", "1"}], 
+   ")"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"g", "[", "y_", "]"}], ":=", 
+  RowBox[{"(", 
+   RowBox[{"1", "+", 
+    SuperscriptBox[
+     RowBox[{"(", 
+      FractionBox["y", "10"], ")"}], "6"]}], ")"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"f", "[", 
+   RowBox[{"x_", ",", "y_", ",", "a_", ",", "b_"}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"h2", "[", 
+    RowBox[{"x", ",", "a", ",", "b"}], "]"}], "*", 
+   RowBox[{"g", "[", "y", "]"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"Plot3D", "[", 
+    RowBox[{
+     RowBox[{"f", "[", 
+      RowBox[{"x", ",", "y", ",", "a", ",", "b"}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", 
+       RowBox[{"-", "20"}], ",", "150"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"y", ",", 
+       RowBox[{"-", "50"}], ",", "50"}], "}"}], ",", 
+     RowBox[{"AxesLabel", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{"\"\<x\>\"", ",", "\"\<y\>\"", ",", "\"\<f\>\""}], "}"}]}], 
+     ",", 
+     RowBox[{"PlotRange", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "50"}], ",", "1000"}], "}"}]}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"a", ",", "0", ",", "14"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"b", ",", "0", ",", 
+     FractionBox["1", "12"]}], "}"}]}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"Plot", "[", 
+    RowBox[{
+     RowBox[{"f", "[", 
+      RowBox[{"x", ",", "0", ",", "a", ",", "b"}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", 
+       RowBox[{"-", "20"}], ",", "150"}], "}"}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"a", ",", "0", ",", "14"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"b", ",", "0", ",", 
+     FractionBox["1", "12"]}], "}"}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.865970388003778*^9, 3.8659704026094837`*^9}, {
+  3.865984870018276*^9, 3.865984985745241*^9}, {3.8659850194670153`*^9, 
+  3.865985037554051*^9}},
+ CellLabel->
+  "In[2807]:=",ExpressionUUID->"60e33253-8c9d-4506-8674-9e568d1dca71"],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`a$$ = 14., $CellContext`b$$ = 0, 
+    Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
+    Typeset`bookmarkMode$$ = "Menu", Typeset`animator$$, Typeset`animvar$$ = 
+    1, Typeset`name$$ = "\"untitled\"", Typeset`specs$$ = {{
+      Hold[$CellContext`a$$], 0, 14}, {
+      Hold[$CellContext`b$$], 0, 
+      Rational[1, 12]}}, Typeset`size$$ = {360., {164., 169.}}, 
+    Typeset`update$$ = 0, Typeset`initDone$$, Typeset`skipInitDone$$ = True}, 
+    
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`a$$ = 0, $CellContext`b$$ = 0}, 
+      "ControllerVariables" :> {}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> Plot3D[
+        $CellContext`f[$CellContext`x, $CellContext`y, $CellContext`a$$, \
+$CellContext`b$$], {$CellContext`x, -20, 150}, {$CellContext`y, -50, 50}, 
+        AxesLabel -> {"x", "y", "f"}, PlotRange -> {-50, 1000}], 
+      "Specifications" :> {{$CellContext`a$$, 0, 14}, {$CellContext`b$$, 0, 
+         Rational[1, 12]}}, "Options" :> {}, "DefaultOptions" :> {}],
+     ImageSizeCache->{404., {223., 229.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.865984925672803*^9, 3.865984945784696*^9}, 
+   3.8659849883154373`*^9, {3.865985020298691*^9, 3.86598503867074*^9}},
+ CellLabel->
+  "Out[2810]=",ExpressionUUID->"ab1ef3c8-fa52-4a8b-a84a-aa1da546376b"],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`a$$ = 14., $CellContext`b$$ = 0, 
+    Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
+    Typeset`bookmarkMode$$ = "Menu", Typeset`animator$$, Typeset`animvar$$ = 
+    1, Typeset`name$$ = "\"untitled\"", Typeset`specs$$ = {{
+      Hold[$CellContext`a$$], 0, 14}, {
+      Hold[$CellContext`b$$], 0, 
+      Rational[1, 12]}}, Typeset`size$$ = {360., {111., 116.}}, 
+    Typeset`update$$ = 0, Typeset`initDone$$, Typeset`skipInitDone$$ = True}, 
+    
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`a$$ = 0, $CellContext`b$$ = 0}, 
+      "ControllerVariables" :> {}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> Plot[
+        $CellContext`f[$CellContext`x, 
+         0, $CellContext`a$$, $CellContext`b$$], {$CellContext`x, -20, 150}], 
+      "Specifications" :> {{$CellContext`a$$, 0, 14}, {$CellContext`b$$, 0, 
+         Rational[1, 12]}}, "Options" :> {}, "DefaultOptions" :> {}],
+     ImageSizeCache->{404., {170., 176.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.865984925672803*^9, 3.865984945784696*^9}, 
+   3.8659849883154373`*^9, {3.865985020298691*^9, 3.865985038846589*^9}},
+ CellLabel->
+  "Out[2811]=",ExpressionUUID->"78976563-72f7-4a9e-b88f-0c9c96d2bb94"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Creating a 2D function from 2 1D Functions", "Title",
+ CellChangeTimes->{{3.8659683761876993`*^9, 
+  3.865968403581677*^9}},ExpressionUUID->"411e4942-0438-408d-a0ff-\
+ddbe2161c37a"],
+
+Cell[BoxData[
+ StyleBox[
+  RowBox[{
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"We", " ", "have", " ", "two", " ", 
+       RowBox[{"functions", " ", "'"}], 
+       RowBox[{"h", "'"}], " ", 
+       RowBox[{"and", " ", "'"}], 
+       RowBox[{"g", "'"}], " ", "which", " ", "satisfy", " ", "the", " ", 
+       "condition", "\[IndentingNewLine]", "h", 
+       RowBox[{"(", "0", ")"}]}], "=", 
+      RowBox[{"1", "=", 
+       RowBox[{"g", 
+        RowBox[{"(", "0", ")"}], "\[IndentingNewLine]", "We", " ", "want", 
+        " ", "a", " ", "2", "D", " ", "function", " ", "that", " ", "can", 
+        " ", "be", " ", "thought", " ", "of", " ", "as", " ", "multiplying", 
+        " ", "the", " ", "two", " ", "functions", " ", 
+        RowBox[{
+        "together", ".", " ", "\[IndentingNewLine]", "Specifically"}]}]}]}], 
+     ",", " ", 
+     RowBox[{
+     "if", " ", "the", " ", "2", "D", " ", "function", " ", "is", " ", "f", 
+      RowBox[{"(", 
+       RowBox[{"x", ",", "y"}], ")"}], " ", "then", " ", "the", " ", 
+      "function", " ", "restricted", " ", "along", " ", "two", " ", 
+      "different", " ", "axes", " ", "are", " ", "h", " ", "and", " ", "g", 
+      " ", 
+      RowBox[{"respectively", ".", " ", "\[IndentingNewLine]", "These"}], " ",
+       "two", " ", "axes", " ", "are", " ", "angled", " ", "to", " ", "each", 
+      " ", 
+      RowBox[{"other", ".", " ", "\[IndentingNewLine]", "WLOG"}], " ", "we", 
+      " ", "can", " ", "assume", " ", "that", " ", "one", " ", "of", " ", 
+      "the", " ", "axes", " ", "is", " ", "the", " ", "y", " ", 
+      RowBox[{"axis", ".", " ", "Let"}], " ", "the", " ", "other", " ", 
+      "axis", " ", "have", " ", "angle", " ", "\[Theta]", " ", "wrt", " ", 
+      "the", " ", "x", " ", 
+      RowBox[{"axis", "."}]}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+     "If", " ", "we", " ", "call", " ", "this", " ", "axis", " ", "as", " ", 
+      "u"}], ",", " ", 
+     RowBox[{
+      RowBox[{
+      "then", " ", "we", " ", "can", " ", "define", " ", "another", " ", 
+       "axis", " ", "v", " ", "orthogonal", "  ", "to", " ", "u", " ", 
+       RowBox[{"s", ".", "t", ".", " ", "we"}], " ", "have", " ", "the", " ", 
+       "following", " ", "relation", "\[IndentingNewLine]", "        ", "u"}],
+       "=", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"x", " ", "cos\[Theta]"}], "+", 
+        RowBox[{"ysin\[Theta]", "\[IndentingNewLine]", "v"}]}], "=", 
+       RowBox[{
+        RowBox[{"-", "xsin\[Theta]"}], "+", "ycos\[Theta]"}]}]}]}], 
+    "\[IndentingNewLine]", "*)"}]}], "Text"]], "Input",
+ CellChangeTimes->{{3.865968406541894*^9, 3.865968506810115*^9}, {
+  3.8659687657101994`*^9, 3.8659688306781187`*^9}, {3.865968910335629*^9, 
+  3.865968928105447*^9}, {3.8659690007133303`*^9, 3.865969078252124*^9}, {
+  3.865969108379498*^9, 3.865969200877965*^9}, {3.865969239249632*^9, 
+  3.865969505970477*^9}, {3.865969540998784*^9, 
+  3.865969589999078*^9}},ExpressionUUID->"37d7e008-33df-4202-b258-\
+5e92707e2e1d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   StyleBox["(*", "Text"], 
+   RowBox[{
+    StyleBox[
+     RowBox[{
+      RowBox[{
+       RowBox[{"f", 
+        RowBox[{"(", 
+         RowBox[{"x", ",", "y"}], ")"}], " ", "along", " ", "the", " ", "u", 
+        " ", "axis", " ", "is", " ", "h", 
+        RowBox[{"(", "u", ")"}]}], "\[IndentingNewLine]", 
+       RowBox[{"f", 
+        RowBox[{"(", 
+         RowBox[{"x", ",", "y"}], ")"}], " ", "along", " ", "the", " ", "y", 
+        " ", "axis", " ", "is", " ", "g", 
+        RowBox[{"(", "y", ")"}]}], "\[IndentingNewLine]", "The", " ", 
+       "equation", " ", "for", " ", "the", " ", "u", " ", "axis", " ", "is", 
+       " ", "\[IndentingNewLine]", "v"}], "=", 
+      RowBox[{"0", "=", 
+       RowBox[{
+        RowBox[{">", "xsin\[Theta]"}], "=", 
+        RowBox[{"ycos\[Theta]", "=", 
+         RowBox[{
+          RowBox[{">", "y"}], "=", 
+          RowBox[{
+          "xtan\[Theta]", "\[IndentingNewLine]", "Putting", " ", "this", " ", 
+           "conditions", " ", "in"}]}]}]}]}]}], "Text"], 
+    StyleBox[",", "Text"], 
+    StyleBox[" ", "Text"], 
+    RowBox[{
+     StyleBox[
+      RowBox[{"we", " ", "get", "\[IndentingNewLine]", "f", 
+       RowBox[{"(", 
+        RowBox[{"x", ",", "tan\[Theta]x"}], ")"}]}], "Text"], 
+     StyleBox["=", "Text"], 
+     RowBox[{
+      StyleBox[
+       RowBox[{"h", 
+        RowBox[{"(", "u", ")"}]}], "Text"], 
+      StyleBox["=", "Text"], 
+      RowBox[{
+       RowBox[{
+        StyleBox["h", "Text"], 
+        RowBox[{
+         StyleBox["(", "Text"], 
+         StyleBox[
+          RowBox[{"xcos\[Theta]", "+", "ysin\[Theta]"}], "Text"], ")"}]}], 
+       "=", 
+       RowBox[{
+        RowBox[{"h", 
+         RowBox[{"(", 
+          RowBox[{"xcos\[Theta]", "+", 
+           RowBox[{"xtan\[Theta]", " ", "sin\[Theta]"}]}], ")"}], 
+         "\[IndentingNewLine]", "f", 
+         RowBox[{"(", 
+          RowBox[{"x", ",", "tan\[Theta]x"}], ")"}]}], "=", 
+        RowBox[{
+         RowBox[{"h", 
+          RowBox[{"(", "xsec\[Theta]", ")"}], "\[IndentingNewLine]", "f", 
+          RowBox[{"(", 
+           RowBox[{"0", ",", "y"}], ")"}]}], "=", 
+         RowBox[{
+          RowBox[{"g", 
+           RowBox[{"(", "y", ")"}], "\[IndentingNewLine]", "We", " ", 
+           "suppose", " ", "\[IndentingNewLine]", "f", 
+           RowBox[{"(", 
+            RowBox[{"x", ",", "y"}], ")"}]}], "=", 
+          RowBox[{
+           RowBox[{"h", 
+            RowBox[{"(", "xsec\[Theta]", ")"}], "c", 
+            RowBox[{"(", "x", ")"}], "g", 
+            RowBox[{"(", "y", ")"}], "\[IndentingNewLine]", "Imposing", " ", 
+            "the", " ", "above", " ", "conditions", " ", "give", " ", "us", 
+            "\[IndentingNewLine]", "f", 
+            RowBox[{"(", 
+             RowBox[{"x", ",", 
+              RowBox[{"tan\[Theta]", " ", "x"}]}], ")"}]}], "=", 
+           RowBox[{
+            RowBox[{"h", 
+             RowBox[{"(", 
+              RowBox[{"sec\[Theta]", " ", "x"}], ")"}], "c", 
+             RowBox[{"(", "x", ")"}], "g", 
+             RowBox[{"(", 
+              RowBox[{"tan\[Theta]", " ", "x"}], ")"}]}], "=", 
+            RowBox[{
+             RowBox[{"h", 
+              RowBox[{"(", 
+               RowBox[{"sec\[Theta]", " ", "x"}], ")"}], 
+              "\[IndentingNewLine]", "which", " ", "gives", " ", "us", " ", 
+              "c", 
+              RowBox[{"(", "x", ")"}]}], "=", 
+             RowBox[{
+              RowBox[{"1", "/", "g"}], 
+              RowBox[{"(", 
+               RowBox[{"tan\[Theta]", " ", "x"}], ")"}], 
+              "\[IndentingNewLine]", "Plugging", " ", "this", " ", "back", 
+              " ", "in"}]}]}]}]}]}]}]}]}]}], ",", " ", 
+    RowBox[{
+     RowBox[{"we", " ", "get", "\[IndentingNewLine]", "f", 
+      RowBox[{"(", 
+       RowBox[{"x", ",", "y"}], ")"}]}], "=", 
+     RowBox[{
+      RowBox[{
+       FractionBox[
+        RowBox[{"h", 
+         RowBox[{"(", "xsec\[Theta]", ")"}]}], 
+        RowBox[{"g", 
+         RowBox[{"(", 
+          RowBox[{"tan\[Theta]", " ", "x"}], ")"}]}]], "g", 
+       RowBox[{"(", "y", ")"}], "\[IndentingNewLine]", "The", " ", "second", 
+       " ", "condition", " ", "applied", " ", "to", " ", "the", " ", "above", 
+       " ", "gives", " ", "us", "\[IndentingNewLine]", "f", 
+       RowBox[{"(", 
+        RowBox[{"0", ",", "y"}], ")"}]}], "=", 
+      RowBox[{
+       RowBox[{"h", 
+        RowBox[{"(", "0", ")"}], 
+        FractionBox[
+         RowBox[{"g", 
+          RowBox[{"(", "y", ")"}]}], 
+         RowBox[{"g", 
+          RowBox[{"(", "0", ")"}]}]]}], "=", 
+       RowBox[{
+        RowBox[{"g", 
+         RowBox[{"(", "y", ")"}], "\[IndentingNewLine]", "where", " ", "we", 
+         " ", "used", " ", "the", " ", "condition", " ", "that", " ", "h", 
+         RowBox[{"(", "0", ")"}]}], "=", 
+        RowBox[{
+         RowBox[{"g", 
+          RowBox[{"(", "0", ")"}]}], "=", "1."}]}]}]}]}]}], 
+   "\[IndentingNewLine]", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   StyleBox["\[IndentingNewLine]",
+    FontWeight->"Bold",
+    FontColor->RGBColor[1, 0, 0]], 
+   RowBox[{
+    StyleBox[
+     RowBox[{
+      RowBox[{
+      "The", " ", "function", " ", "of", " ", "interest", " ", "that", " ", 
+       "we", " ", "will", " ", "study", " ", "different", " ", "cases", " ", 
+       "of", " ", "is", " ", "thus", " ", "given", " ", "by", 
+       "\[IndentingNewLine]", "f", 
+       RowBox[{"(", 
+        RowBox[{"x", ",", "y"}], ")"}]}], "=", 
+      RowBox[{
+       RowBox[{"h", 
+        RowBox[{"(", "xsec\[Theta]", ")"}], "g", 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{
+           StyleBox["tan\[Theta]",
+            FontWeight->"Bold"], " ", 
+           StyleBox["x",
+            FontWeight->"Bold"]}], ")"}], 
+         RowBox[{"-", "1"}]], "g", 
+        RowBox[{"(", "y", ")"}], "\[IndentingNewLine]", "Notice", " ", "that",
+         " ", "when", " ", "\[Theta]"}], "=", "0"}]}],
+     FontWeight->"Bold",
+     FontColor->GrayLevel[0]], 
+    StyleBox[",",
+     FontWeight->"Bold",
+     FontColor->GrayLevel[0]], 
+    StyleBox[",",
+     FontWeight->"Bold",
+     FontColor->GrayLevel[0]], 
+    StyleBox[" ",
+     FontWeight->"Bold",
+     FontColor->GrayLevel[0]], 
+    RowBox[{
+     StyleBox[
+      RowBox[{"we", " ", "get", "\[IndentingNewLine]", "f", 
+       RowBox[{"(", 
+        RowBox[{"x", ",", "y"}], ")"}]}],
+      FontWeight->"Bold",
+      FontColor->GrayLevel[0]], 
+     StyleBox["=",
+      FontWeight->"Bold",
+      FontColor->GrayLevel[0]], 
+     RowBox[{
+      RowBox[{
+       StyleBox["h",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[
+        RowBox[{"(", "x", ")"}],
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["g",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       SuperscriptBox[
+        RowBox[{"(", 
+         StyleBox["0",
+          FontWeight->"Bold",
+          FontColor->GrayLevel[0]], ")"}], 
+        RowBox[{"-", "1"}]], 
+       StyleBox["g",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[
+        RowBox[{"(", "y", ")"}],
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["\[IndentingNewLine]",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["Which",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[" ",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["reduces",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[" ",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["to",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[" ",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["the",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[" ",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["expected",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["\[IndentingNewLine]",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox["f",
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]], 
+       StyleBox[
+        RowBox[{"(", 
+         RowBox[{"x", ",", "y"}], ")"}],
+        FontWeight->"Bold",
+        FontColor->GrayLevel[0]]}], 
+      StyleBox["=",
+       FontWeight->"Bold",
+       FontColor->GrayLevel[0]], 
+      StyleBox[
+       RowBox[{"h", 
+        RowBox[{"(", "x", ")"}], "g", 
+        RowBox[{"(", "y", ")"}]}],
+       FontWeight->"Bold",
+       FontColor->GrayLevel[0]]}]}]}], "\[IndentingNewLine]", 
+   "*)"}]}]], "Input",
+ CellChangeTimes->{{3.865969595343453*^9, 3.865969670406551*^9}, {
+  3.865969733420332*^9, 3.8659698330612926`*^9}, {3.865969873527381*^9, 
+  3.8659700025283203`*^9}, {3.8659700458963823`*^9, 3.865970280499873*^9}, {
+  3.865970335163926*^9, 3.8659704376343517`*^9}, {3.865970858603745*^9, 
+  3.865970877449861*^9}, {3.865984389971221*^9, 3.865984484933062*^9}, {
+  3.865984651894456*^9, 3.86598476933573*^9}, {3.865984806041931*^9, 
+  3.86598482019804*^9}},ExpressionUUID->"af71d687-1ad0-4b97-bb85-\
+528df0a0a232"],
+
+Cell[BoxData[
+ RowBox[{"(*", 
+  RowBox[{
+   RowBox[{
+   "Testing", " ", "out", " ", "the", " ", "case", " ", "of", " ", "theta"}], 
+   "=", 
+   FractionBox["\[Pi]", "4"]}], "*)"}]], "Input",
+ CellChangeTimes->{{3.865985352005077*^9, 
+  3.865985397356949*^9}},ExpressionUUID->"8daa3db5-5311-46aa-914e-\
+48f43821c938"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"\[Theta]", ":=", 
+  FractionBox["\[Pi]", "4"]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"h", "[", 
+   RowBox[{"x_", ",", "a_", ",", "b_"}], "]"}], ":=", 
+  RowBox[{"(", 
+   RowBox[{
+    RowBox[{
+     FractionBox["1", "4"], "*", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       FractionBox["x", "10"], ")"}], "4"]}], "-", 
+    RowBox[{
+     FractionBox["a", "3"], "*", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       FractionBox["x", "10"], ")"}], "3"]}], "+", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"b", "+", 
+       FractionBox["1", "4"]}], ")"}], "*", 
+     FractionBox[
+      SuperscriptBox["a", "2"], "2"], "*", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       FractionBox["x", "10"], ")"}], "2"]}], "+", "1"}], 
+   ")"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"g", "[", "y_", "]"}], ":=", 
+  RowBox[{"(", 
+   RowBox[{"1", "+", 
+    SuperscriptBox[
+     RowBox[{"(", 
+      FractionBox["y", "10"], ")"}], "6"]}], ")"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"f", "[", 
+   RowBox[{"x_", ",", "y_", ",", "a_", ",", "b_"}], "]"}], ":=", 
+  RowBox[{
+   FractionBox[
+    RowBox[{"h2", "[", 
+     RowBox[{
+      RowBox[{"x", "*", 
+       RowBox[{"Sec", "[", "\[Theta]", "]"}]}], ",", "a", ",", "b"}], "]"}], 
+    RowBox[{"g", "[", 
+     RowBox[{"x", "*", 
+      RowBox[{"Tan", "[", "\[Theta]", "]"}]}], "]"}]], "*", 
+   RowBox[{"g", "[", "y", "]"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"Plot3D", "[", 
+    RowBox[{
+     RowBox[{"f", "[", 
+      RowBox[{"x", ",", "y", ",", "a", ",", "b"}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", 
+       RowBox[{"-", "100"}], ",", "150"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"y", ",", 
+       RowBox[{"-", "100"}], ",", "100"}], "}"}], ",", 
+     RowBox[{"AxesLabel", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{"\"\<x\>\"", ",", "\"\<y\>\"", ",", "\"\<f\>\""}], "}"}]}], 
+     ",", 
+     RowBox[{"PlotRange", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "50"}], ",", "1000"}], "}"}]}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"a", ",", "0", ",", "14"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"b", ",", "0", ",", 
+     FractionBox["1", "12"]}], "}"}]}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"Plot", "[", 
+    RowBox[{
+     RowBox[{"f", "[", 
+      RowBox[{"x", ",", "0", ",", "a", ",", "b"}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", 
+       RowBox[{"-", "100"}], ",", "150"}], "}"}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"a", ",", "0", ",", "14"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"b", ",", "0", ",", 
+     FractionBox["1", "12"]}], "}"}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.865970388003778*^9, 3.8659704026094837`*^9}, {
+  3.865984870018276*^9, 3.865984985745241*^9}, {3.8659850194670153`*^9, 
+  3.865985037554051*^9}, {3.865985406320821*^9, 3.865985492658482*^9}, {
+  3.865985535962964*^9, 3.865985567680668*^9}},
+ CellLabel->
+  "In[2824]:=",ExpressionUUID->"a95739bf-d8a4-4427-b54e-76e2dac78dcc"],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`a$$ = 14., $CellContext`b$$ = 0, 
+    Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
+    Typeset`bookmarkMode$$ = "Menu", Typeset`animator$$, Typeset`animvar$$ = 
+    1, Typeset`name$$ = "\"untitled\"", Typeset`specs$$ = {{
+      Hold[$CellContext`a$$], 0, 14}, {
+      Hold[$CellContext`b$$], 0, 
+      Rational[1, 12]}}, Typeset`size$$ = {360., {164., 169.}}, 
+    Typeset`update$$ = 0, Typeset`initDone$$, Typeset`skipInitDone$$ = True}, 
+    
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`a$$ = 0, $CellContext`b$$ = 0}, 
+      "ControllerVariables" :> {}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> Plot3D[
+        $CellContext`f[$CellContext`x, $CellContext`y, $CellContext`a$$, \
+$CellContext`b$$], {$CellContext`x, -100, 150}, {$CellContext`y, -100, 100}, 
+        AxesLabel -> {"x", "y", "f"}, PlotRange -> {-50, 1000}], 
+      "Specifications" :> {{$CellContext`a$$, 0, 14}, {$CellContext`b$$, 0, 
+         Rational[1, 12]}}, "Options" :> {}, "DefaultOptions" :> {}],
+     ImageSizeCache->{404., {223., 229.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.865984925672803*^9, 3.865984945784696*^9}, 
+   3.8659849883154373`*^9, {3.865985020298691*^9, 3.86598503867074*^9}, {
+   3.86598551067105*^9, 3.865985538584798*^9}, 3.865985569132189*^9},
+ CellLabel->
+  "Out[2828]=",ExpressionUUID->"a79d0ee2-bf33-4b0e-8339-5ed48ef01c99"],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`a$$ = 14., $CellContext`b$$ = 0, 
+    Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
+    Typeset`bookmarkMode$$ = "Menu", Typeset`animator$$, Typeset`animvar$$ = 
+    1, Typeset`name$$ = "\"untitled\"", Typeset`specs$$ = {{
+      Hold[$CellContext`a$$], 0, 14}, {
+      Hold[$CellContext`b$$], 0, 
+      Rational[1, 12]}}, Typeset`size$$ = {360., {110., 115.}}, 
+    Typeset`update$$ = 0, Typeset`initDone$$, Typeset`skipInitDone$$ = True}, 
+    
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`a$$ = 0, $CellContext`b$$ = 0}, 
+      "ControllerVariables" :> {}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> Plot[
+        $CellContext`f[$CellContext`x, 
+         0, $CellContext`a$$, $CellContext`b$$], {$CellContext`x, -100, 150}],
+       "Specifications" :> {{$CellContext`a$$, 0, 14}, {$CellContext`b$$, 0, 
+         Rational[1, 12]}}, "Options" :> {}, "DefaultOptions" :> {}],
+     ImageSizeCache->{404., {169., 175.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.865984925672803*^9, 3.865984945784696*^9}, 
+   3.8659849883154373`*^9, {3.865985020298691*^9, 3.86598503867074*^9}, {
+   3.86598551067105*^9, 3.865985538584798*^9}, 3.86598556931146*^9},
+ CellLabel->
+  "Out[2829]=",ExpressionUUID->"3cedd40d-ab3b-4ac0-bfb7-0a5ecc74000a"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"(*", 
+  RowBox[{
+   RowBox[{"Though", " ", "f", 
+    RowBox[{"(", 
+     RowBox[{"x", ",", "y"}], ")"}], " ", "has", " ", "the", " ", "desired", 
+    " ", "property"}], ",", " ", 
+   RowBox[{
+   "it", " ", "doesnt", " ", "have", " ", "the", " ", "expected", " ", 
+    "behaviour"}], ","}], "*)"}]], "Input",
+ CellChangeTimes->{{3.86598578318337*^9, 
+  3.8659858077037983`*^9}},ExpressionUUID->"89f1d472-a763-44d7-9f71-\
+dd047b896713"]
+}, Open  ]]
+},
+WindowSize->{1680, 925},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"13.0 for Mac OS X ARM (64-bit) (December 2, 2021)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"94d10c9b-4527-4042-b3cc-0a9c6de68680"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 187, 3, 98, "Title",ExpressionUUID->"836c6215-9bb9-4292-98e6-56a3cca5f14a"],
+Cell[770, 27, 3161, 72, 231, "Input",ExpressionUUID->"f5807350-7fb2-4c6e-9d7e-576435ff7568"],
+Cell[3934, 101, 9154, 264, 597, "Input",ExpressionUUID->"c551a59e-3a42-4ffe-b213-741bdd03ba4e"],
+Cell[13091, 367, 228, 4, 30, "Input",ExpressionUUID->"9dd72327-2cae-49bd-adcf-04f807c2aa44"],
+Cell[13322, 373, 290, 8, 30, "Input",ExpressionUUID->"fbc62d47-6c77-4959-ab64-6317e4727136"],
+Cell[CellGroupData[{
+Cell[13637, 385, 2704, 83, 195, "Input",ExpressionUUID->"60e33253-8c9d-4506-8674-9e568d1dca71"],
+Cell[16344, 470, 2001, 40, 471, "Output",ExpressionUUID->"ab1ef3c8-fa52-4a8b-a84a-aa1da546376b"],
+Cell[18348, 512, 1903, 39, 365, "Output",ExpressionUUID->"78976563-72f7-4a9e-b88f-0c9c96d2bb94"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[20300, 557, 187, 3, 98, "Title",ExpressionUUID->"411e4942-0438-408d-a0ff-ddbe2161c37a"],
+Cell[20490, 562, 3021, 64, 231, "Input",ExpressionUUID->"37d7e008-33df-4202-b258-5e92707e2e1d"],
+Cell[23514, 628, 9154, 264, 597, "Input",ExpressionUUID->"af71d687-1ad0-4b97-bb85-528df0a0a232"],
+Cell[32671, 894, 316, 9, 36, "Input",ExpressionUUID->"8daa3db5-5311-46aa-914e-48f43821c938"],
+Cell[CellGroupData[{
+Cell[33012, 907, 3076, 92, 258, "Input",ExpressionUUID->"a95739bf-d8a4-4427-b54e-76e2dac78dcc"],
+Cell[36091, 1001, 2075, 41, 471, "Output",ExpressionUUID->"a79d0ee2-bf33-4b0e-8339-5ed48ef01c99"],
+Cell[38169, 1044, 1973, 40, 363, "Output",ExpressionUUID->"3cedd40d-ab3b-4ac0-bfb7-0a5ecc74000a"]
+}, Open  ]],
+Cell[40157, 1087, 457, 12, 30, "Input",ExpressionUUID->"89f1d472-a763-44d7-9f71-dd047b896713"]
+}, Open  ]]
+}
+]
+*)
+

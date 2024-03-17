@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Xdmf Version="3.0">
+  <Domain>
+    <Grid GridType="Collection" CollectionType="Temporal" Name="u">
+      <Grid Name="u_0" GridType="Uniform">
+        <Topology NumberOfElements="1000" TopologyType="PolyLine" NodesPerElement="2">
+          <DataItem Dimensions="1000 2" NumberType="UInt" Format="HDF">test-1-Constraint4.h5:u/u_0/mesh/topology</DataItem>
+        </Topology>
+        <Geometry GeometryType="XY">
+          <DataItem Dimensions="1001 2" Format="HDF">test-1-Constraint4.h5:u/u_0/mesh/geometry</DataItem>
+        </Geometry>
+        <Time Value="0.000000" />
+        <Attribute ItemType="FiniteElementFunction" ElementFamily="CG" ElementDegree="2" ElementCell="interval" Name="u" Center="Other" AttributeType="Scalar">
+          <DataItem Dimensions="3000 1" NumberType="UInt" Format="HDF">test-1-Constraint4.h5:u/u_0/cell_dofs</DataItem>
+          <DataItem Dimensions="2001 1" NumberType="Float" Format="HDF">test-1-Constraint4.h5:u/u_0/vector</DataItem>
+          <DataItem Dimensions="1001 1" NumberType="UInt" Format="HDF">test-1-Constraint4.h5:u/u_0/x_cell_dofs</DataItem>
+          <DataItem Dimensions="1000 1" NumberType="UInt" Format="HDF">test-1-Constraint4.h5:u/u_0/cells</DataItem>
+        </Attribute>
+      </Grid>
+    </Grid>
+  </Domain>
+</Xdmf>

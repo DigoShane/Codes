@@ -1,0 +1,45 @@
+=============================================================================================================================================================================================================================================
+I am solving a nonlinear coupled ODE, with 2 functions $u$ and $A$ and a lagrange multiplier $r$. Since I am using Newton Rhapson, I have to control the step size (relaxation paramter) so that the residue doesnt blow up. This means more no. of steps till convergence, so i am trying to write the output in a xdmf file which i can use as input for the next set of iterations. When I try to store the output using write_checkpoint, I get the following runtime error.
+
+*** -------------------------------------------------------------------------
+*** Error:   Unable to find element family.
+*** Reason:  Element Mixed not yet supported.
+*** Where:   This error was encountered inside XDMFFile.cpp.
+*** Process: 0
+*** 
+*** DOLFIN version: 2018.1.0
+*** Git changeset:  
+*** -------------------------------------------------------------------------
+
+My FunctionSpace is created using MixedElements, and I guess the error above remarks that I have to use another route (it's an implementation issue). It is not clear to me if another route exists.
+
+A MWE is presented below:-
+```
+from dolfin import *
+import fenics as fe
+import matplotlib.pyplot as plt
+
+#Create mesh and define function space
+Lx=10.  #length of domain
+mesh = fe.IntervalMesh(1000,0,Lx)
+x = SpatialCoordinate(mesh)
+VA = FiniteElement("CG", mesh.ufl_cell(), 2) #Element for A
+Vu = FiniteElement("CG", mesh.ufl_cell(), 2) #Element for u
+R = FiniteElement("Real", mesh.ufl_cell(), 0) #Element for Lagrange multiplier
+V = FunctionSpace(mesh, MixedElement(VA, Vu, R)) #Creating functionSpace
+
+#Newton Rhapson input
+Aur = interpolate( Expression(("1","0.0", "1.5"), degree=2), V)#SC phase as initial cond.
+ 
+##Save solution in a .xdmf file
+Aur_out = XDMFFile('test-Const.xdmf')
+Aur_out.write_checkpoint(project(Aur,V), "Aur", 0, XDMFFile.Encoding.HDF5, False)
+Aur_out.close()
+```
+
+
+=============================================================================================================================================================================================================================================
+
+
+It was solved. Check "https://fenicsproject.discourse.group/t/error-in-trying-to-write-mixed-elements/13482"
+

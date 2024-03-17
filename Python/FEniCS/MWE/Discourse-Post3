@@ -1,0 +1,41 @@
+1. Double root mention
+2. Mention why you need the double root formulation.
+-----------------------------------------------------------------------------------------------------------------
+I want to implement a Newton Rhapson that solves a problem with a double root.
+
+My actual problem of interest has another variable and is a bit more complicated. But i can reproduce the issue with this MWE so i decided to stick with this.
+I present a MWE below. The problem formulation for the MWE can be thought of as follows.
+I have a domain [0,L_x], where I want to solve an ODE with a constraint. Its nonlinear so i want to use the Newton Rhapson method.
+The ODE corresponds to the minimization problem:
+$$\inf_{u\geq 0} \int_{0}^{L_x} (1-u^2)^2/2 + u'^2/\kappa^2 dx$$
+$$\text{subject to:-} \int_{0}^{L_x} (u-1/2) dx = 0 $$
+$$ u(0)=0 $$
+$$ u(L_x)=1 $$
+
+The function of interest is $u$, and a lagrange multiplier, '$r$' is used to implement the constraint. 
+
+When solving the problem in u, I do not enforce this constraint since the minimization problem is symmetric wrt -u. If u is a soln, so is -u. 
+However, applying the Newton Rhapson method to the problem in u tends to give me minimizers which do not satisfy $u \geq 0$. The issue is that i am completely missing the global minimum every time.
+I know this cause the energy density associated with these forms are larger than 1/2 which I have reason to believe shouldnot be the case. So the global minimum is being missed every time. 
+For L_x small enough, I am getting an energy density less than 1/2, but for L_x large, it goes to other local minima which vary from -1 to 1. If i replace the trial function with |u|, the energy is clearly not the global minima.
+
+In order to capture this behaviour, I have set $w^2=u$ and reformulated the above problem. The thought process is that this whatever the minimizer of the problem in u, the minimizer problem in w would have a form that allows variation in [-1,1].
+However the issue is that the Newton Rhapson blows up after the first iteration, returning 'nan'. I guess this is because of the double root introduced at u=0. I would like to know how to approach this problem in FEniCS.
+According to Wikipedia, for a double root, one has to replace $f(x)=0$, with $f'(x)
+
+
+
+Reason I need the double root formulation
+
+
+
+NB:-
+I also have a variant where i wrote the nodal values in a text file. Loaded it, interpolated it (with scipy) to generate an expression that could be used as input. However, it still gave me the same error.
+
+
+
+
+
+
+
+

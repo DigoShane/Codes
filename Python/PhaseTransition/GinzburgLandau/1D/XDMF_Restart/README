@@ -1,0 +1,7 @@
+The codes this this folder were written such that they an be stopped (using a relaxation parameter and absolute tolerance),
+their output stored in a xdmf file. These are the values at the nodes plus the corresponidng function. This can then be read into the code as initial guess
+for the next set of runs.
+
+Here we store the Constraint codes.
+
+1. the "*-1D.py" code works well. 

@@ -1,0 +1,30 @@
+1. Cant let the code run forever since it runs out of memory.
+2. Describe the way to run the code. Point out the residue that you are getting.
+3. Remove some of the non-linearities and see if the issue persists.
+4. Describe the problem formulation. This can be copied form the previous post.
+
+-----------------------------------------------------------------------------------------------------------------
+I have written a Newton Solver which take the "absolute tolerance" as input and uses it as a stopping criterion. 
+Once the code converges, we write the output in an xdmf file. I can then re-run the code which reads in the the functions from the file as initial condition. However, if you keep track of the residue, the residue for the new iteration is higher. 
+
+
+------------------
+I have a Newton Rhapson Code that solves a nonlinear coupled PDE in two variables $u$ and $A$. The problem is posed on a 1D domain $[0,L]$ ($L=300$) and we have an external field $H=1$ in this problem. We discretize into $N=3000$ pieces. The way the code is written is that we accept a relaxation parameter and an absolute tolerance for the Newton solver. The code converges based on this criterion.  We write the output in a xdmf file. We then allow the code to read in the pdf file; we uncomment some lines and comment on some other lines. We then run the code with new relaxation parameters and absolute tolerance waiting for the code to converge. 
+
+
+
+
+
+
+
+
+NB:-
+I also have a variant where i wrote the nodal values in a text file. Loaded it, interpolated it (with scipy) to generate an expression that could be used as input. However, it still gave me the same error.
+
+
+
+
+
+
+
+

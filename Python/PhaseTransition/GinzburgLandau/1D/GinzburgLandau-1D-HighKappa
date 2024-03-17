@@ -1,0 +1,146 @@
+#HEre we study the 1D Ginzburg landau equation in the limit of high kappa.
+#The effect is that the gradient of u term doesnt appear in the formulation anymore.
+#The math can be found on p 42/288 of St JAmes and Sarma "Type II superconductivity".
+#There is a mathematica code "1DType-IIHighKappa.nb"
+#which gives a closed form solution. Unfortunately, it canst seem to solve the problem with boundary conditions.
+#===============================================================================================================
+#There are two equations which we can solve. They differ in the imposed boundary condition.
+#The code allows for both boundary conditions.
+#Thankfully the weakform is the same in both cases.
+#In the following, h is the magnetic field and f is the order parameter.
+#To change from case I to case II, just comment the irrelevant case under Dirichlet BCs
+#===============================================================================================================
+#---------------------------------------------------------------------------------------------------------------
+# Case I
+#---------------------------------------------------------------------------------------------------------------
+#In short the equation to solve is
+#u''=u-u^3
+#u(0)=0,  u'(L)=0
+#f=√(1-u^2)
+#h=-du/dx
+#The weak form :-
+#∫u(1-u^2)v+u'v'=0
+#---------------------------------------------------------------------------------------------------------------
+# Case II
+#---------------------------------------------------------------------------------------------------------------
+#In short the equation to solve is
+#u''=u-u^3
+#u(0)=0,  u(L)=1
+#f=√(1-u^2)
+#h=-du/dx
+#The weak form :-
+#∫u(1-u^2)v+u'v'=0
+#===============================================================================================================
+#THINGS TO NOTE:-
+#1.The length of the domain is an input. 
+#  We have left Length of the domain as an input.
+#  To change it to the original case where L is not an input, comment oout the code asking to input L.
+#===============================================================================================================
+#ISSUES WITH THE CODE:-
+#1. For some values of L, the plot of h(x) is very jagged. However, u is very smooth. 
+#   This is clearly an issue with how im computing the derivatibe in the code.
+#2. The wasy f=√(1-u^2) is being computed is not reliable. If u>1 in some region of the domian,
+#   it is returning 'Nan' for the whole domain.
+#3. Also for some values the u being returned is negative. 
+#   While this is not an issue as such, it does hint that the algorithm has somehow found its way to the left hand well. 
+#   If we go beyond this, we might go to -∞.
+
+from dolfin import *
+import fenics as fe
+import matplotlib.pyplot as plt
+
+# Optimization options for the form compiler
+parameters["form_compiler"]["cpp_optimize"] = True
+ffc_options = {"optimize": True, \
+               "eliminate_zeros": True, \
+               "precompute_basis_const": True, \
+               "precompute_ip_const": True}
+
+#Defining sqrt
+def safe_sqrt(x):
+    return sqrt(x + DOLFIN_EPS)
+def ddx(v):
+    return grad(v)
+#def Aofh(v,e):
+#    return grad(v)/(e**2)
+
+
+# Create mesh and define function space
+Lin = input("length of domain? ")#to i/p domain length
+Lx = Constant(Lin)
+#Lx=0.5#for fixed domain length.
+mesh = fe.IntervalMesh(500,0,Lx)
+x = SpatialCoordinate(mesh)
+V = FunctionSpace(mesh, "CG", 2)
+
+# Define functions
+v = TestFunction(V)
+u = Function(V)
+
+#Dirichlet BCs
+def boundary_L(x, on_boundary):
+    tol = 1E-24
+    return on_boundary and near(x[0], 0, tol)
+def boundary_R(x, on_boundary):
+    tol = 1E-24
+    return on_boundary and near(x[0], Lx, tol)
+
+##Case I----------------------------
+#bcs = DirichletBC(V, 0, boundary_L)
+
+#Case II---------------------------
+bc1 = DirichletBC(V, 0, boundary_L)
+bc2 = DirichletBC(V, 1, boundary_R)
+bcs = [bc1, bc2];
+
+#-----------------------------------------------------------------------------------------------------------------
+#!!xDx!! ##!!xDx!! Newton rhapson Approach
+#-----------------------------------------------------------------------------------------------------------------
+u = interpolate( Expression("1.5", degree=2), V)#SC phase as initial cond.
+
+F = ((1-u**2)*u*v + inner(grad(u), grad(v)))*dx 
+#solver.parameters.nonzero_initial_guess = True
+solve(F == 0, u, bcs,
+   solver_parameters={"newton_solver":{"convergence_criterion":"incremental","relaxation_parameter":0.01,"relative_tolerance":0.000001,"absolute_tolerance":0.001,"maximum_iterations":500}})
+
+
+
+#PostProcessing
+#V = u.function_space()
+#mesh = V.mesh()
+#degree = V.ufl_element().degree()
+#W = VectorFunctionSpace(mesh, 'P', degree)
+#f = Function(W)
+#f.assign(project(1-u**2,W))
+##f = sqrt(1-u*u)
+#h = Function(W)
+#h.assign(project(-ddx(u),W))
+##h = project(-grad(u), W)
+##A = Function(W)
+##A.assign(project(Aofh(h,f),W))
+##A = project(grad(h)/f**2, W)
+
+f = Function(V)
+h = Function(V)
+A = Function(V)
+f = project(sqrt(1-u**2),V)
+h = -u.dx(0)
+A = h.dx(0)/f**2
+#pie = assemble((1/(Lx))*((1-u**2)**2/2  + A**2*u**2 + inner(grad(A-Ae), grad(A-Ae)))*dx )
+#print(pie)
+print(f.vector().get_local())
+
+plot(u)
+plt.title(r"$u(x)$",fontsize=26)
+plt.show()
+plot(f)
+plt.title(r"$f(x)$",fontsize=26)
+plt.show()
+plot(h)
+plt.title(r"$h(x)$",fontsize=26)
+plt.show()
+#plot(A)
+#plt.title(r"$A(x)$",fontsize=26)
+#plt.show()
+
+

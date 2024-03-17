@@ -1,0 +1,8 @@
+This is a fodler where i want to run Dftpy codes.
+
+I have been able to run the simple code for aluminum.
+
+
+------------------------------------------------------------
+Decided to skip this and go with PySCF instead. This is because there is more documentation
+For PySCF.

@@ -1,0 +1,333 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     12040,        325]
+NotebookOptionsPosition[      8259,        252]
+NotebookOutlinePosition[      8979,        276]
+CellTagsIndexPosition[      8895,        271]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["  FITTING A FOURIER SERIES TO A SET OF DATA", "Section",
+ CellChangeTimes->{{3.867664037275518*^9, 3.867664038138164*^9}},
+ FontColor->RGBColor[
+  1, 0, 0],ExpressionUUID->"3c6c18a0-2156-433d-bfa5-e60aef9fae6f"],
+
+Cell["\<\
+The following example illustrates the use of NonlinearFit to fit a Fourier \
+series to a set of data we believe to be periodic.\
+\>", "Text",
+ FontColor->GrayLevel[
+  0.333333],ExpressionUUID->"e327267a-959e-4eec-8317-37f88a3e8885"],
+
+Cell[CellGroupData[{
+
+Cell["Some data", "Subsection",ExpressionUUID->"c6da248d-3303-464f-ae18-a682ca4bdb4f"],
+
+Cell["We begin by creating some fake data for our example.", "Text",ExpressionUUID->"990d1469-d9c5-4626-ac16-7b3fd238cc4b"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"data", "=", 
+    RowBox[{"Table", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"i", ",", 
+        RowBox[{
+         RowBox[{"Cos", "[", "i", "]"}], "+", 
+         RowBox[{"3", " ", 
+          RowBox[{"Sin", "[", "i", "]"}]}], " ", "+", " ", 
+         RowBox[{"Random", "[", 
+          RowBox[{"Real", ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"-", ".05"}], ",", ".05"}], "}"}]}], "]"}]}]}], "}"}], 
+      ",", 
+      RowBox[{"{", 
+       RowBox[{"i", ",", "1", ",", "80", ",", ".5"}], "}"}]}], "]"}]}], ";"}],
+   "\[IndentingNewLine]"}]], "Input",
+ CellLabel->
+  "In[8236]:=",ExpressionUUID->"b7cbf509-a6a1-43fe-b585-2c902b92bdc6"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Loading the package", "Subsection",ExpressionUUID->"10046de2-90b8-466f-8022-21c9297a5f5a"],
+
+Cell["\<\
+NonlinearFit is a function contained in the package Statistics`NonlinearFit. \
+To use the function we need to load the package. The following command loads \
+the package.\
+\>", "Text",ExpressionUUID->"71f89417-a862-4704-aa0f-003ea38e9944"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"<<", "Statistics`NonlinearFit`"}]], "Input",
+ CellLabel->
+  "In[8237]:=",ExpressionUUID->"e35e1d7f-0d81-4305-9320-b1c2f9a4b907"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Get", "noopen", 
+   "\"Cannot open \\!\\(\\*RowBox[{\\\"\\\\\\\"Statistics`NonlinearFit`\\\\\\\
+\"\\\"}]\\).\"", 2, 8237, 1896, 18141434132229643036, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.867664058213613*^9},
+ CellLabel->
+  "During evaluation of \
+In[8237]:=",ExpressionUUID->"0a9fa796-536d-4454-b828-f83856865dc4"],
+
+Cell[BoxData["$Failed"], "Output",
+ CellChangeTimes->{3.867664058290201*^9},
+ CellLabel->
+  "Out[8237]=",ExpressionUUID->"66bc426c-f0e2-4960-a22a-8f964da64479"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The function", "Subsection",ExpressionUUID->"c310c8ff-dc37-4dc3-ae53-28a50d5a6d8c"],
+
+Cell["\<\
+The function we will use is NonlinearFit. It requires, in addition to the \
+data points the following information.\
+\>", "Text",ExpressionUUID->"a8ba02d7-0a68-4ac9-bc24-8fa9e9db31e6"],
+
+Cell[CellGroupData[{
+
+Cell["The model", "Subsubsection",ExpressionUUID->"fceb3022-3bec-466e-b1a7-f161a0fe8db9"],
+
+Cell["\<\
+All fit functions require us to provide a model. We will use the following \
+model for this example. The parameters in this model are the b[i] and c[i]. \
+You can see the form of the model by removing the semi-colon at the end of \
+the expression.\
+\>", "Text",ExpressionUUID->"3a7d5446-8f04-4aae-9d34-56231cad802d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"model", " ", "=", " ", 
+   RowBox[{"a0", "+", 
+    RowBox[{"Sum", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"b", "[", "i", "]"}], "*", 
+       RowBox[{"Cos", "[", 
+        RowBox[{"i", 
+         RowBox[{"(", 
+          RowBox[{"t", "-", 
+           RowBox[{"c", "[", "i", "]"}]}], ")"}]}], "]"}]}], ",", 
+      RowBox[{"{", 
+       RowBox[{"i", ",", "1", ",", "39"}], "}"}]}], "]"}]}]}], ";"}]], "Input",\
+ExpressionUUID->"8b760317-9444-47d1-99e1-b83f792bc4c3"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The parameters", "Subsubsection",ExpressionUUID->"29bc3fae-2bfc-47b3-b5fe-2427d451c469"],
+
+Cell["\<\
+We also need to specify the parameters in our model. In this case the easiest \
+way to construct such a list is with the Table function.\
+\>", "Text",ExpressionUUID->"fafa0fb9-e8c9-435a-b50f-593f8b75c1ba"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"params", "=", " ", 
+   RowBox[{"Join", "[", 
+    RowBox[{
+     RowBox[{"{", "a0", "}"}], ",", 
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"b", "[", "i", "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"i", ",", "1", ",", "39"}], "}"}]}], "]"}], ",", 
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"c", "[", "i", "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"i", ",", "1", ",", "39"}], "}"}]}], "]"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"4d9f58f5-30ca-4b1a-8658-eb1da47900d6"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Using the NonlinearFit function", "Subsection",ExpressionUUID->"4ce57d99-a511-4575-87c8-78e6f9774e85"],
+
+Cell[TextData[StyleBox["Now we put our data, model, parameter list and the \
+names of our variables in the function to get our answer. We have applied \
+Chop below to eliminate terms of very small size:",
+ FontColor->GrayLevel[0]]], "Text",
+ FontColor->RGBColor[
+  1, 0, 1],ExpressionUUID->"7cbb50bb-7d23-47df-b4c8-f622fba9665a"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"?", "NonlinearFit"}]], "Input",
+ Evaluatable->False,ExpressionUUID->"7a4e979e-6f6b-40c2-8ba0-2a2567189ec1"],
+
+Cell[BoxData["\"\<NonlinearFit[data, model, vars, params] searches for a \
+least-squares  fit to a list of data according to the model containing the \
+variables vars and the parameters params.  Parameters may be expressed as a \
+list of symbols  or a list of lists.  \>"], "Print",
+ GeneratedCell->False,
+ CellAutoOverwrite->False,
+ CellTags->
+  "Info3222058268-7762773",ExpressionUUID->"b7b21880-d325-4ea0-b0b2-\
+c034d78d0081"]
+}, Open  ]],
+
+Cell["\<\
+The fitted function is very long so I have suppressed the output.\
+\>", "Text",ExpressionUUID->"34533479-328c-4472-9e31-639e036b5539"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"B", "[", "t_", "]"}], "=", 
+   RowBox[{"Chop", "[", 
+    RowBox[{"NonlinearFit", "[", 
+     RowBox[{"data", ",", "model", ",", "t", ",", "params"}], "]"}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"15c88a7b-bd4a-4617-9d04-e7e3be529354"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Looking at our solution", "Subsection",ExpressionUUID->"32a62fc4-1119-4f50-9f42-39433cf35b95"],
+
+Cell["\<\
+We can use plot functions to get an idea of how well our function fits the \
+data. First a plot of the data.\
+\>", "Text",ExpressionUUID->"d118a178-952c-4293-a069-d481bdd65b2f"],
+
+Cell[BoxData[
+ RowBox[{"g1", "=", 
+  RowBox[{"ListPlot", "[", 
+   RowBox[{"data", ",", 
+    RowBox[{"PlotJoined", "\[Rule]", "True"}], ",", 
+    RowBox[{"PlotStyle", "\[Rule]", 
+     RowBox[{"RGBColor", "[", 
+      RowBox[{"1", ",", "0", ",", "0"}], "]"}]}]}], "]"}]}]], "Input",Expressi\
+onUUID->"2c31f80c-e2f3-476d-9094-5f845ba1df63"],
+
+Cell[BoxData[
+ RowBox[{"g2", "=", 
+  RowBox[{"Plot", "[", 
+   RowBox[{
+    RowBox[{"B", "[", "t", "]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"t", ",", "1", ",", "80"}], "}"}], ",", 
+    RowBox[{"PlotStyle", "->", 
+     RowBox[{"RGBColor", "[", 
+      RowBox[{"0", ",", "1", ",", "0"}], "]"}]}]}], "]"}]}]], "Input",Expressi\
+onUUID->"cf522896-ee6d-410c-9010-ff5f113e34a3"],
+
+Cell["The plot suggests our function to be a good fit.", "Text",ExpressionUUID->"adf3520c-33ca-4109-8568-2a44bfb292c9"],
+
+Cell[BoxData[
+ RowBox[{"Show", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"g1", ",", "g2"}], "}"}], ",", 
+   RowBox[{"ImageSize", " ", "\[Rule]", " ", "540"}]}], "]"}]], "Input",Expres\
+sionUUID->"7a116881-9216-4036-b439-37ccde1f1799"]
+}, Open  ]]
+}, Open  ]]
+},
+ScreenStyleEnvironment->"Presentation",
+WindowSize->{1680, 925},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+PrivateNotebookOptions->{"VersionedStylesheet"->{"Default.nb"[8.] -> False}},
+FrontEndVersion->"13.0 for Mac OS X ARM (64-bit) (December 2, 2021)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"91deda4d-e1ff-4ca2-8ed5-649912b60598"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{
+ "Info3222058268-7762773"->{
+  Cell[5949, 184, 429, 8, 120, "Print",ExpressionUUID->"b7b21880-d325-4ea0-b0b2-c034d78d0081",
+   CellTags->"Info3222058268-7762773"]}
+ }
+*)
+(*CellTagsIndex
+CellTagsIndex->{
+ {"Info3222058268-7762773", 8736, 265}
+ }
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 217, 3, 97, "Section",ExpressionUUID->"3c6c18a0-2156-433d-bfa5-e60aef9fae6f"],
+Cell[800, 27, 242, 5, 51, "Text",ExpressionUUID->"e327267a-959e-4eec-8317-37f88a3e8885"],
+Cell[CellGroupData[{
+Cell[1067, 36, 86, 0, 66, "Subsection",ExpressionUUID->"c6da248d-3303-464f-ae18-a682ca4bdb4f"],
+Cell[1156, 38, 123, 0, 51, "Text",ExpressionUUID->"990d1469-d9c5-4626-ac16-7b3fd238cc4b"],
+Cell[1282, 40, 719, 22, 93, "Input",ExpressionUUID->"b7cbf509-a6a1-43fe-b585-2c902b92bdc6"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2038, 67, 96, 0, 66, "Subsection",ExpressionUUID->"10046de2-90b8-466f-8022-21c9297a5f5a"],
+Cell[2137, 69, 249, 4, 87, "Text",ExpressionUUID->"71f89417-a862-4704-aa0f-003ea38e9944"],
+Cell[CellGroupData[{
+Cell[2411, 77, 152, 3, 54, "Input",ExpressionUUID->"e35e1d7f-0d81-4305-9320-b1c2f9a4b907"],
+Cell[2566, 82, 381, 9, 38, "Message",ExpressionUUID->"0a9fa796-536d-4454-b828-f83856865dc4"],
+Cell[2950, 93, 160, 3, 54, "Output",ExpressionUUID->"66bc426c-f0e2-4960-a22a-8f964da64479"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3159, 102, 89, 0, 66, "Subsection",ExpressionUUID->"c310c8ff-dc37-4dc3-ae53-28a50d5a6d8c"],
+Cell[3251, 104, 193, 3, 51, "Text",ExpressionUUID->"a8ba02d7-0a68-4ac9-bc24-8fa9e9db31e6"],
+Cell[CellGroupData[{
+Cell[3469, 111, 89, 0, 49, "Subsubsection",ExpressionUUID->"fceb3022-3bec-466e-b1a7-f161a0fe8db9"],
+Cell[3561, 113, 326, 5, 87, "Text",ExpressionUUID->"3a7d5446-8f04-4aae-9d34-56231cad802d"],
+Cell[3890, 120, 504, 15, 54, "Input",ExpressionUUID->"8b760317-9444-47d1-99e1-b83f792bc4c3"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4431, 140, 94, 0, 49, "Subsubsection",ExpressionUUID->"29bc3fae-2bfc-47b3-b5fe-2427d451c469"],
+Cell[4528, 142, 215, 3, 51, "Text",ExpressionUUID->"fafa0fb9-e8c9-435a-b50f-593f8b75c1ba"],
+Cell[4746, 147, 555, 16, 54, "Input",ExpressionUUID->"4d9f58f5-30ca-4b1a-8658-eb1da47900d6"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5350, 169, 108, 0, 66, "Subsection",ExpressionUUID->"4ce57d99-a511-4575-87c8-78e6f9774e85"],
+Cell[5461, 171, 329, 5, 87, "Text",ExpressionUUID->"7cbb50bb-7d23-47df-b4c8-f622fba9665a"],
+Cell[CellGroupData[{
+Cell[5815, 180, 131, 2, 54, "Input",ExpressionUUID->"7a4e979e-6f6b-40c2-8ba0-2a2567189ec1",
+ Evaluatable->False],
+Cell[5949, 184, 429, 8, 120, "Print",ExpressionUUID->"b7b21880-d325-4ea0-b0b2-c034d78d0081",
+ CellTags->"Info3222058268-7762773"]
+}, Open  ]],
+Cell[6393, 195, 144, 2, 51, "Text",ExpressionUUID->"34533479-328c-4472-9e31-639e036b5539"],
+Cell[6540, 199, 286, 7, 54, "Input",ExpressionUUID->"15c88a7b-bd4a-4617-9d04-e7e3be529354"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6863, 211, 100, 0, 66, "Subsection",ExpressionUUID->"32a62fc4-1119-4f50-9f42-39433cf35b95"],
+Cell[6966, 213, 187, 3, 51, "Text",ExpressionUUID->"d118a178-952c-4293-a069-d481bdd65b2f"],
+Cell[7156, 218, 336, 8, 54, "Input",ExpressionUUID->"2c31f80c-e2f3-476d-9094-5f845ba1df63"],
+Cell[7495, 228, 373, 10, 54, "Input",ExpressionUUID->"cf522896-ee6d-410c-9010-ff5f113e34a3"],
+Cell[7871, 240, 119, 0, 51, "Text",ExpressionUUID->"adf3520c-33ca-4109-8568-2a44bfb292c9"],
+Cell[7993, 242, 238, 6, 54, "Input",ExpressionUUID->"7a116881-9216-4036-b439-37ccde1f1799"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+

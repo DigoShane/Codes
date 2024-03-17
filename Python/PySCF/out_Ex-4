@@ -1,0 +1,280 @@
+#INFO: **** input file is /Users/DigoSen/Desktop/Books/Codes/Python/PySCF/Ex-4.py ****
+#This is example 4.
+
+
+
+#!/usr/bin/env python
+#
+# Author: Qiming Sun <osirpt.sun@gmail.com>
+#
+
+'''
+Another input style.
+
+There are three different methods to initialize a Mole object.
+1. To use function pyscf.M or gto.M as shown by 00-simple_hf.py.
+2. As this script did, first create gto.Mole object, assign value to each
+   attributes (see pyscf/gto/mole.py file for the details of attributes), then
+   call mol.build() to initialize the mol object.
+3. First create Mole object, then call .build() function with keyword arguments
+   eg
+
+   >>> mol = gto.Mole()
+   >>> mol.build(atom='O 0 0 0; H 0 -2.757 2.587; H 0 2.757  2.587', basis='ccpvdz', symmetry=1)
+
+mol.build() should be called to update the Mole object whenever Mole's
+attributes are changed in your script. Note to mute the noise produced by
+mol.build function, you can execute mol.build(0,0) instead.
+'''
+
+from pyscf import gto, scf
+
+mol = gto.Mole()  # initialize molecular object
+mol.verbose = 5  # For debugging
+mol.output = 'out_Ex-4' # Stating where to store the output.
+mol.atom = '''
+O        0.000000    0.000000    0.117790
+H        0.000000    0.755453   -0.471161
+H        0.000000   -0.755453   -0.471161'''  # specying the atoms and their locations.
+mol.basis = 'ccpvdz'  # specifying the basis
+mol.symmetry = 1    # ??? is 1 the same as true???
+mol.build()   # building objects.
+
+mf = scf.RHF(mol)  #Specifying that i want to run Restricted Hartree Fock
+mf.kernel() # running.
+#INFO: ******************** input file end ********************
+
+
+System: uname_result(system='Darwin', node='MacBook-Pro-304.local', release='23.4.0', version='Darwin Kernel Version 23.4.0: Wed Feb 21 21:44:06 PST 2024; root:xnu-10063.101.15~2/RELEASE_ARM64_T8103', machine='arm64')  Threads 1
+Python 3.11.5 (main, Sep 11 2023, 08:31:25) [Clang 14.0.6 ]
+numpy 1.24.3  scipy 1.11.1
+Date: Fri Mar 15 20:52:26 2024
+PySCF version 2.5.0
+PySCF path  /Users/DigoSen/anaconda3/lib/python3.11/site-packages/pyscf
+
+[CONFIG] conf_file None
+[INPUT] verbose = 5
+[INPUT] max_memory = 4000 
+[INPUT] num. atoms = 3
+[INPUT] num. electrons = 10
+[INPUT] charge = 0
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry 1 subgroup None
+[INPUT] Mole.unit = angstrom
+[INPUT] Symbol           X                Y                Z      unit          X                Y                Z       unit  Magmom
+[INPUT]  1 O      0.000000000000   0.000000000000   0.117790000000 AA    0.000000000000   0.000000000000   0.222590840213 Bohr   0.0
+[INPUT]  2 H      0.000000000000   0.755453000000  -0.471161000000 AA    0.000000000000   1.427599269981  -0.890365250576 Bohr   0.0
+[INPUT]  3 H      0.000000000000  -0.755453000000  -0.471161000000 AA    0.000000000000  -1.427599269981  -0.890365250576 Bohr   0.0
+[INPUT] ---------------- BASIS SET ---------------- 
+[INPUT] l, kappa, [nprim/nctr], expnt,             c_1 c_2 ...
+[INPUT] O
+[INPUT] 0    0    [8    /2   ]  11720             0.00071 -0.00016
+                                1759              0.00547 -0.001263
+                                400.8             0.027837 -0.006267
+                                113.7             0.1048 -0.025716
+                                37.03             0.283062 -0.070924
+                                13.27             0.448719 -0.165411
+                                5.025             0.270952 -0.116955
+                                1.013             0.015458 0.557368
+[INPUT] 0    0    [1    /1   ]  0.3023               1
+[INPUT] 1    0    [3    /1   ]  17.7              0.043018
+                                3.854             0.228913
+                                1.046             0.508728
+[INPUT] 1    0    [1    /1   ]  0.2753               1
+[INPUT] 2    0    [1    /1   ]  1.185                1
+[INPUT] H
+[INPUT] 0    0    [3    /1   ]  13.01             0.019685
+                                1.962             0.137977
+                                0.4446            0.478148
+[INPUT] 0    0    [1    /1   ]  0.122                1
+[INPUT] 1    0    [1    /1   ]  0.727                1
+
+nuclear repulsion = 9.18919322930975  # might be coulomb repulsion of atoms.
+point group symmetry = C2v 
+symmetry origin: [ 0.00000000e+00  0.00000000e+00 -3.77945225e-07]
+symmetry axis x: [-1. -0. -0.]
+symmetry axis y: [0. 1. 0.]
+symmetry axis z: [0. 0. 1.]
+num. orbitals of irrep A1 = 11
+num. orbitals of irrep A2 = 2
+num. orbitals of irrep B1 = 4
+num. orbitals of irrep B2 = 7
+number of shells = 11
+number of NR pGTOs = 40
+number of NR cGTOs = 24
+basis = ccpvdz
+ecp = {}
+CPU time:         2.20
+
+
+# These are things related to "2--Self-consistent field (SCF) methods — PySCF.pdf"
+******** <class 'pyscf.scf.hf_symm.SymAdaptedRHF'> ********
+method = SymAdaptedRHF
+initial guess = minao
+damping factor = 0
+level_shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+diis_start_cycle = 1
+diis_space = 8
+diis_damp = 0
+SCF conv_tol = 1e-09
+SCF conv_tol_grad = None
+SCF max_cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = /var/folders/1g/ph21gtcx2bbd4j5d7qk2tnc00000gn/T/tmpsgfu5w29
+max_memory 4000 MB (current use 0 MB)
+Freeze 0 electrons in irreps []
+    10 free electrons in irreps A1 A2 B1 B2
+Set gradient conv threshold to 3.16228e-05
+Initial guess from minao.
+E1 = -121.59529992671236  E_coul = 36.549312668372544
+init E= -75.8567940290301
+cond(S) = 108.60124534683227
+    CPU time for initialize scf      0.15 sec, wall time      0.04 sec
+HOMO (B1) = -0.476831117041994  LUMO (A1) = 0.100670365867418
+irrep_nelec = [6, 0, 2, 2]
+A1 nocc = 3  HOMO = -0.590302079844623  LUMO = 0.100670365867418
+   mo_energy = [-20.80200734  -1.6227879   -0.59030208   0.10067037   0.77545543
+   1.05754056   1.37817909   1.75516972   2.40909946   3.36420694
+   3.71618422]
+A2 nocc = 0
+   mo_energy = [1.44469267 3.18123081]
+B1 nocc = 1  HOMO = -0.476831117041994  LUMO = 1.07749868347919
+   mo_energy = [-0.47683112  1.07749868  1.62944925  3.13104001]
+B2 nocc = 1  HOMO = -0.752089874697322  LUMO = 0.198523100318342
+   mo_energy = [-0.75208987  0.1985231   0.70482163  1.14685472  1.91515497  2.37467551
+  4.00171529]
+E1 = -124.13043798080182  E_coul = 38.953476257984256
+cycle= 1 E= -75.9877684935078  delta_E= -0.131  |g|= 0.448  |ddm|= 1.31
+    CPU time for cycle= 1      0.04 sec, wall time      0.01 sec
+HOMO (B1) = -0.412741884915753  LUMO (A1) = 0.186372934628288
+irrep_nelec = [6, 0, 2, 2]
+A1 nocc = 3  HOMO = -0.489675517736289  LUMO = 0.186372934628288
+   mo_energy = [-20.31143775  -1.2709788   -0.48967552   0.18637293   0.85513758
+   1.21100372   1.4588393    1.91748899   2.51501032   3.58128706
+   3.93082709]
+A2 nocc = 0
+   mo_energy = [1.47112706 3.41212101]
+B1 nocc = 1  HOMO = -0.412741884915753  LUMO = 1.27192755630586
+   mo_energy = [-0.41274188  1.27192756  1.67210021  3.36169611]
+B2 nocc = 1  HOMO = -0.653166764166658  LUMO = 0.256315386654594
+   mo_energy = [-0.65316676  0.25631539  0.79377773  1.29940833  1.92144242  2.47707145
+  4.22202617]
+E1 = -122.48800013391948  E_coul = 37.28110219402004
+cycle= 2 E= -76.0177047105897  delta_E= -0.0299  |g|= 0.228  |ddm|= 0.371
+    CPU time for cycle= 2      0.04 sec, wall time      0.01 sec
+HOMO (B1) = -0.498312340121217  LUMO (A1) = 0.180763603917531
+irrep_nelec = [6, 0, 2, 2]
+A1 nocc = 3  HOMO = -0.5726860787206  LUMO = 0.180763603917531
+   mo_energy = [-20.57178628  -1.34640895  -0.57268608   0.1807636    0.84493439
+   1.15837069   1.4336167    1.8599549    2.47646654   3.50198783
+   3.85253192]
+A2 nocc = 0
+   mo_energy = [1.46678526 3.3280641 ]
+B1 nocc = 1  HOMO = -0.498312340121217  LUMO = 1.19623748318082
+   mo_energy = [-0.49831234  1.19623748  1.66336834  3.27851817]
+B2 nocc = 1  HOMO = -0.708681931559226  LUMO = 0.25092252668171
+   mo_energy = [-0.70868193  0.25092253  0.77794579  1.24781514  1.92679998  2.43745932
+  4.13913584]
+E1 = -123.18493214338851  E_coul = 37.96915435506313
+cycle= 3 E= -76.0265845590156  delta_E= -0.00888  |g|= 0.0245  |ddm|= 0.131
+    CPU time for cycle= 3      0.02 sec, wall time      0.00 sec
+HOMO (B1) = -0.491306625878277  LUMO (A1) = 0.18554089453673
+irrep_nelec = [6, 0, 2, 2]
+A1 nocc = 3  HOMO = -0.566395181231004  LUMO = 0.18554089453673
+   mo_energy = [-20.54847964  -1.335583    -0.56639518   0.18554089   0.85565347
+   1.16456601   1.44092751   1.86719807   2.48988736   3.51218081
+   3.86279668]
+A2 nocc = 0
+   mo_energy = [1.47723125 3.33764069]
+B1 nocc = 1  HOMO = -0.491306625878277  LUMO = 1.2019449212416
+   mo_energy = [-0.49130663  1.20194492  1.67220741  3.28807853]
+B2 nocc = 1  HOMO = -0.698264619036349  LUMO = 0.255752965788607
+   mo_energy = [-0.69826462  0.25575297  0.78735663  1.25381624  1.93624025  2.45019056
+  4.14972847]
+E1 = -123.13529230588301  E_coul = 37.91934561967656
+cycle= 4 E= -76.0267534568967  delta_E= -0.000169  |g|= 0.00589  |ddm|= 0.0181
+    CPU time for cycle= 4      0.02 sec, wall time      0.00 sec
+HOMO (B1) = -0.492835343204406  LUMO (A1) = 0.185470663146205
+irrep_nelec = [6, 0, 2, 2]
+A1 nocc = 3  HOMO = -0.567002156788257  LUMO = 0.185470663146205
+   mo_energy = [-20.55048133  -1.3364768   -0.56700216   0.18547066   0.85567423
+   1.1640757    1.4411989    1.86672335   2.48967428   3.51166839
+   3.86235923]
+A2 nocc = 0
+   mo_energy = [1.47749131 3.33704592]
+B1 nocc = 1  HOMO = -0.492835343204406  LUMO = 1.20063173043538
+   mo_energy = [-0.49283534  1.20063173  1.67245221  3.28739408]
+B2 nocc = 1  HOMO = -0.698270756548404  LUMO = 0.256175212683781
+   mo_energy = [-0.69827076  0.25617521  0.78763798  1.25382468  1.93663109  2.4504229
+  4.1493039 ]
+E1 = -123.1396326849154  E_coul = 37.92367195739646
+cycle= 5 E= -76.0267674982092  delta_E= -1.4e-05  |g|= 0.000981  |ddm|= 0.00647
+    CPU time for cycle= 5      0.01 sec, wall time      0.00 sec
+HOMO (B1) = -0.493190440417852  LUMO (A1) = 0.185387104552599
+irrep_nelec = [6, 0, 2, 2]
+A1 nocc = 3  HOMO = -0.567220123228791  LUMO = 0.185387104552599
+   mo_energy = [-20.55074601  -1.3366546   -0.56722012   0.1853871    0.85551347
+   1.1638819    1.44109901   1.86658159   2.48951975   3.51143749
+   3.8621299 ]
+A2 nocc = 0
+   mo_energy = [1.47739486 3.33680552]
+B1 nocc = 1  HOMO = -0.493190440417852  LUMO = 1.20031554570948
+   mo_energy = [-0.49319044  1.20031555  1.67235924  3.28718683]
+B2 nocc = 1  HOMO = -0.698219105208221  LUMO = 0.256190323909422
+   mo_energy = [-0.69821911  0.25619032  0.78749726  1.25374479  1.93651645  2.45029287
+  4.14906427]
+E1 = -123.13967135744534  E_coul = 37.92371014339785
+cycle= 6 E= -76.0267679847377  delta_E= -4.87e-07  |g|= 0.000151  |ddm|= 0.00138
+    CPU time for cycle= 6      0.01 sec, wall time      0.00 sec
+HOMO (B1) = -0.49324543644185  LUMO (A1) = 0.185380620764007
+irrep_nelec = [6, 0, 2, 2]
+A1 nocc = 3  HOMO = -0.567259131367076  LUMO = 0.185380620764007
+   mo_energy = [-20.55076357  -1.33667642  -0.56725913   0.18538062   0.85550607
+   1.16386404   1.44108832   1.86657062   2.48951303   3.5114176
+   3.86210661]
+A2 nocc = 0
+   mo_energy = [1.47738799 3.33678124]
+B1 nocc = 1  HOMO = -0.49324543644185  LUMO = 1.20027580155826
+   mo_energy = [-0.49324544  1.2002758   1.67235343  3.28716438]
+B2 nocc = 1  HOMO = -0.698205887463139  LUMO = 0.25620360228633
+   mo_energy = [-0.69820589  0.2562036   0.78750143  1.25374735  1.93651392  2.4502926
+  4.14904419]
+E1 = -123.13966148313533  E_coul = 37.92370025662555
+cycle= 7 E= -76.0267679972  delta_E= -1.25e-08  |g|= 1.68e-05  |ddm|= 0.000267
+    CPU time for cycle= 7      0.01 sec, wall time      0.00 sec
+HOMO (B1) = -0.493244143531578  LUMO (A1) = 0.185379816370043
+irrep_nelec = [6, 0, 2, 2]
+A1 nocc = 3  HOMO = -0.567258850028942  LUMO = 0.185379816370043
+   mo_energy = [-20.55075885  -1.33667412  -0.56725885   0.18537982   0.85550466
+   1.16386345   1.44108847   1.86657105   2.4895129    3.51141862
+   3.86210689]
+A2 nocc = 0
+   mo_energy = [1.47738742 3.33678184]
+B1 nocc = 1  HOMO = -0.493244143531578  LUMO = 1.20027489567736
+   mo_energy = [-0.49324414  1.2002749   1.6723532   3.28716495]
+B2 nocc = 1  HOMO = -0.698199644910544  LUMO = 0.256204287172372
+   mo_energy = [-0.69819964  0.25620429  0.78750071  1.25374927  1.93651377  2.45029294
+  4.14904526]
+E1 = -123.13965810690607  E_coul = 37.92369688023212
+cycle= 8 E= -76.0267679973642  delta_E= -1.64e-10  |g|= 4.02e-06  |ddm|= 2.74e-05
+    CPU time for cycle= 8      0.04 sec, wall time      0.01 sec
+HOMO (B1) = -0.493243107373023  LUMO (A1) = 0.185379850741095
+irrep_nelec = [6, 0, 2, 2]
+A1 nocc = 3  HOMO = -0.567258821330985  LUMO = 0.185379850741095
+   mo_energy = [-20.55075745  -1.33667341  -0.56725882   0.18537985   0.85550474
+   1.16386393   1.44108888   1.86657168   2.48951329   3.51141949
+   3.86210768]
+A2 nocc = 0
+   mo_energy = [1.47738752 3.3367827 ]
+B1 nocc = 1  HOMO = -0.493243107373023  LUMO = 1.20027601496556
+   mo_energy = [-0.49324311  1.20027601  1.67235341  3.28716583]
+B2 nocc = 1  HOMO = -0.698199386920229  LUMO = 0.256204465543902
+   mo_energy = [-0.69819939  0.25620447  0.78750121  1.25374992  1.93651378  2.45029333
+  4.14904615]
+E1 = -123.13965521585565  E_coul = 37.92369398917188
+Extra cycle  E= -76.026767997374  delta_E= -9.82e-12  |g|= 1.75e-06  |ddm|= 5.62e-06
+    CPU time for scf_cycle      0.39 sec, wall time      0.07 sec
+    CPU time for SCF      0.39 sec, wall time      0.07 sec
+converged SCF energy = -76.026767997374

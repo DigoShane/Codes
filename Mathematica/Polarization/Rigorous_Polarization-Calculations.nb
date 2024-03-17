@@ -1,0 +1,166 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      5304,        158]
+NotebookOptionsPosition[      4458,        137]
+NotebookOutlinePosition[      4855,        153]
+CellTagsIndexPosition[      4812,        150]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.9184715469521227`*^9, 3.9184715778376102`*^9}, {
+  3.918471633212903*^9, 3.9184716644437313`*^9}},
+ CellLabel->
+  "In[991]:=",ExpressionUUID->"eb39302c-d6dc-4351-a340-3c3e75515200"],
+
+Cell[BoxData[
+ StyleBox[
+  RowBox[{
+   StyleBox[
+    RowBox[{"(", "*"}]], 
+   RowBox[{
+   "The", " ", "Objective", " ", "of", " ", "this", " ", "Code", " ", "is", 
+    " ", "to", " ", "check", " ", "the", " ", "Calculations", " ", "of", " ", 
+    "the", " ", "paper", " ", "\"\<Rigorous Polarization.\>\""}], 
+   StyleBox[
+    RowBox[{"*", ")"}]]}], "Text",
+  FontSize->24]], "Input",
+ CellChangeTimes->{{3.9184716773808928`*^9, 3.918471694906644*^9}},
+ CellLabel->
+  "In[992]:=",ExpressionUUID->"52025e8f-42ca-4cab-b0a2-4aa930351811"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{"Calculation", " ", "for", " ", 
+    SubscriptBox["F", "l"], 
+    RowBox[{"(", "s", ")"}], " ", "for", " ", "Example", " ", "5.7"}], "*)"}],
+   "\[IndentingNewLine]", 
+  RowBox[{"Integrate", "[", 
+   RowBox[{
+    RowBox[{"Sin", "[", 
+     RowBox[{
+      FractionBox[
+       RowBox[{"2", "*", "\[Pi]", "*", "\[Alpha]", "*", "u1"}], "l"], "-", 
+      RowBox[{"2", "*", "\[Pi]", "*", "\[Alpha]", "*", "u2"}]}], "]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"u2", ",", "0", ",", 
+      RowBox[{"Abs", "[", 
+       RowBox[{
+        FractionBox["i", "\[Alpha]"], "-", 
+        FractionBox["u1", "l"]}], "]"}]}], "}"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.918471704539239*^9, 3.918471718720841*^9}, {
+  3.918471861966929*^9, 3.9184718829087276`*^9}},
+ CellLabel->
+  "In[993]:=",ExpressionUUID->"922db8ee-44d4-423c-9e66-cf65a053e6e2"],
+
+Cell[BoxData[
+ FractionBox[
+  RowBox[{
+   RowBox[{"-", 
+    RowBox[{"Cos", "[", 
+     FractionBox[
+      RowBox[{"2", " ", "\[Pi]", " ", "u1", " ", "\[Alpha]"}], "l"], "]"}]}], 
+   "+", 
+   RowBox[{"Cos", "[", 
+    RowBox[{"2", " ", "\[Pi]", " ", 
+     RowBox[{"(", 
+      RowBox[{
+       FractionBox[
+        RowBox[{"u1", " ", "\[Alpha]"}], "l"], "-", 
+       RowBox[{"FractionalPart", "[", 
+        RowBox[{"\[Alpha]", " ", 
+         RowBox[{"Abs", "[", 
+          RowBox[{
+           FractionBox["u1", "l"], "-", 
+           FractionBox["i", "\[Alpha]"]}], "]"}]}], "]"}]}], ")"}]}], "]"}]}], 
+  RowBox[{"2", " ", "\[Pi]", " ", "\[Alpha]"}]]], "Input",
+ CellChangeTimes->{{3.9184719460323553`*^9, 
+  3.9184719514981537`*^9}},ExpressionUUID->"8eebd7ac-0f99-450f-9d44-\
+f2ca7b929f1c"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"Wrt", " ", "the", " ", "above", " ", "calculation"}], ",", " ", 
+    RowBox[{
+    "we", " ", "want", " ", "to", " ", "make", " ", "sure", " ", "we", " ", 
+     "understand", " ", "the"}]}], " ", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", 
+    RowBox[{"(", 
+     RowBox[{
+      FractionBox[
+       RowBox[{"u1", " ", "\[Alpha]"}], "l"], "-", 
+      RowBox[{"FractionalPart", "[", 
+       RowBox[{"\[Alpha]", " ", 
+        RowBox[{"Abs", "[", 
+         RowBox[{
+          FractionBox["u1", "l"], "-", 
+          FractionBox["i", "\[Alpha]"]}], "]"}]}], "]"}]}], ")"}]}], "//", 
+   "Expand"}]}]], "Input",
+ CellChangeTimes->{{3.918471959188541*^9, 3.918471963316576*^9}, {
+  3.918472092847405*^9, 
+  3.918472119525323*^9}},ExpressionUUID->"1353e9fa-7044-4550-8acc-\
+b8c448161768"],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox[
+   RowBox[{"2", " ", "\[Pi]", " ", "u1", " ", "\[Alpha]"}], "l"], "-", 
+  RowBox[{"2", " ", "\[Pi]", " ", 
+   RowBox[{"FractionalPart", "[", 
+    RowBox[{"\[Alpha]", " ", 
+     RowBox[{"Abs", "[", 
+      RowBox[{
+       FractionBox["u1", "l"], "-", 
+       FractionBox["i", "\[Alpha]"]}], "]"}]}], "]"}]}]}]], "Output",
+ CellChangeTimes->{3.9184719639530973`*^9},
+ CellLabel->
+  "Out[995]=",ExpressionUUID->"26936c6c-27f2-4c3f-8db5-68b83ab097ea"]
+}, Open  ]]
+},
+WindowSize->{808, 815},
+WindowMargins->{{100, Automatic}, {0, Automatic}},
+FrontEndVersion->"13.2 for Mac OS X ARM (64-bit) (November 18, 2022)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"4162d4e1-9d21-4aba-9d4b-eb3aa1a17d83"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 280, 5, 30, "Input",ExpressionUUID->"eb39302c-d6dc-4351-a340-3c3e75515200"],
+Cell[841, 27, 535, 14, 79, "Input",ExpressionUUID->"52025e8f-42ca-4cab-b0a2-4aa930351811"],
+Cell[1379, 43, 883, 23, 72, "Input",ExpressionUUID->"922db8ee-44d4-423c-9e66-cf65a053e6e2"],
+Cell[2265, 68, 786, 23, 57, "Input",ExpressionUUID->"8eebd7ac-0f99-450f-9d44-f2ca7b929f1c"],
+Cell[CellGroupData[{
+Cell[3076, 95, 878, 24, 75, "Input",ExpressionUUID->"1353e9fa-7044-4550-8acc-b8c448161768"],
+Cell[3957, 121, 485, 13, 51, "Output",ExpressionUUID->"26936c6c-27f2-4c3f-8db5-68b83ab097ea"]
+}, Open  ]]
+}
+]
+*)
+
