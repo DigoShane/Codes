@@ -1,5 +1,6 @@
 #Here we solve the 2D Ginzbug Landau problem with an applied magnetic field.
 #Here we want to use Energy minimization method. We start off with Gradient Descent.
+#HEre a1 is \ve{A}\cdot e_1, a2 is \ve{A}\cdot e_2, u is u. However, \theta=t
 #======================================================================================================
 #The way the Code works
 #1. The input to the code is:
@@ -39,34 +40,40 @@ mesh = mshr.generate_mesh(domain, int(lx*10/kappa), int(ly*10/kappa))
 x = SpatialCoordinate(mesh)
 Va1 = FiniteElement("CG", mesh.ufl_cell(), 2)
 Va2 = FiniteElement("CG", mesh.ufl_cell(), 2)
+Vt = FiniteElement("CG", mesh.ufl_cell(), 2)
 Vu = FiniteElement("CG", mesh.ufl_cell(), 2)
-V = FunctionSpace(mesh, MixedElement(Va1, Va2, Vu))
+V = FunctionSpace(mesh, MixedElement(Va1, Va2, Vt, Vu))
 Vcoord = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
 
 
 # Define functions
-da1a2u = TrialFunction(V)
-(da1, da2, du) = split(da1a2u)
-#n = FacetNormal(mesh)
+a1a2tu = Function(V)
+(a1, a2, t, u) = split(a1a2tu)
+a1a2tu_up = Function(V)
+(a1_up, a2_up, t_up, u_up) = split(a1a2tu_up)
 
 
 
 # Parameters
-kappa = Constant(1);
+gamma = float(0.01) # Learning rate.
+NN = int(input('Number of iterations?\n')) # Number of iterations
 Hin = input("External Magnetic field? ")
 H = Constant(Hin);
-rlx_par_in = input("relaxation parameter? ")
-rlx_par = Constant(rlx_par_in);
 tol_abs_in = input("absolute tolerance? ")
 tol_abs = Constant(tol_abs_in);
-Ae = H*x[0]
+Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
 
 
 def curl(a1,a2):
     return a1.dx(0) - a2.dx(1)
 
-#Newton rhapson Approach
-a1a2u = interpolate( Expression(("0.0","0.0", "1"), degree=2), V)#SC phase as initial cond.
+#Defining the energy
+Pi = ((1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u)) + ( (a1-t.dx(0))**2 + (a2-t.dx(1))**2 )*u**2 + inner( curl(a1 ,a2-Ae), curl(a1 ,a2-Ae) ) )*dx
+
+
+
+
+
 #---------------------------------------------------------------------------------------------------------------
 ##Reading input from a .xdmf file.
 #a1a2u = Function(V)
