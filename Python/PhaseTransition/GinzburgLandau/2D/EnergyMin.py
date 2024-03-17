@@ -1,5 +1,5 @@
 #Here we solve the 2D Ginzbug Landau problem with an applied magnetic field.
-#the whole formulation is presented in OneNote UH/superConductivity/Coding/2D Ginzburg Landau fenics -2.
+#Here we want to use Energy minimization method. We start off with Gradient Descent.
 #======================================================================================================
 #The way the Code works
 #1. The input to the code is:
@@ -11,13 +11,16 @@
 #   When reading the functions, we interpolate onto a space VAu.
 #======================================================================================================
 #Things to keep in mind about writing this code:-
-#1. Introduce theta in the code.
 #1. Define a functoon to evaluate the curl
 #2. Define a rotation funciton.
 #3. HAve replace L with l throught.
 #4. All variables are lower case.
 #5. REdo the code by using Hn\cdot B\perp
-#6. Implement Nesterov acceleration and Noisy Gradient Descent.
+#6. Implement Nesterov acceleration, momentum and Noisy Gradient Descent.
+#======================================================================================================
+#ISSUES WITH THE CODE:-
+
+
 
 from dolfin import *
 import fenics as fe
@@ -28,10 +31,11 @@ import mshr
 
 
 #Create mesh and define function space
-l = 10
-kappa = Constant(1);
-domain = mshr.Rectangle(Point(0,0), Point(l, l)) 
-mesh = mshr.generate_mesh(domain, int(l*10/float(kappa)))
+lx = 10
+ly = 10
+kappa = Constqnt(2.0)
+domain = mshr.Rectangle(Point(0,0), Point(lx, ly)) 
+mesh = mshr.generate_mesh(domain, int(lx*10/kappa), int(ly*10/kappa))
 x = SpatialCoordinate(mesh)
 Va1 = FiniteElement("CG", mesh.ufl_cell(), 2)
 Va2 = FiniteElement("CG", mesh.ufl_cell(), 2)
@@ -39,48 +43,6 @@ Vu = FiniteElement("CG", mesh.ufl_cell(), 2)
 V = FunctionSpace(mesh, MixedElement(Va1, Va2, Vu))
 Vcoord = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
 
-
-#Boundary conditions
-class Top(SubDomain):
-    def inside(self, x, on_boundary):
-        return on_boundary and near(x[1] , l , DOLFIN_EPS) 
-
-class Left(SubDomain):
-    def inside(self, x, on_boundary):
-        return on_boundary and near(x[0] , -l , DOLFIN_EPS) 
-
-class Bottom(SubDomain):
-    def inside(self, x, on_boundary):
-        return on_boundary and near(x[1] , -l , DOLFIN_EPS) 
-
-class Right(SubDomain):
-    def inside(self, x, on_boundary):
-        return on_boundary and near(x[0] , l , DOLFIN_EPS) 
-
-
-boundaries = MeshFunction("size_t", mesh, mesh.topology().dim()-1, 0)
-top = Top()
-left = Left()
-bottom = Bottom()
-right = Right()
-
-top.mark(boundaries, 2)
-left.mark(boundaries, 3)
-bottom.mark(boundaries, 4)
-right.mark(boundaries, 5)
-
-
-bc1 = DirichletBC(V.sub(1), 1, boundaries, 2) #Setting u=1 on top boundary
-bc2 = DirichletBC(V.sub(1), 1, boundaries, 3) #Setting u=1 on left boundary
-bc3 = DirichletBC(V.sub(1), 1, boundaries, 4) #Setting u=1 on bottom boundary
-bc4 = DirichletBC(V.sub(1), 1, boundaries, 5) #Setting u=1 on right boundary
-bc5 = DirichletBC(V.sub(1), 0, boundaries, 1) #Setting u=0 on inner boundary
-bc6 = DirichletBC(V.sub(0), 100, boundaries, 1)#A on the inner boundary, is 100
-bcs = [bc1, bc2, bc3, bc4, bc5, bc6];
-
-ds = Measure('ds', domain=mesh, subdomain_data=boundaries)
-
-File("boundaries.pvd").write(boundaries)
 
 # Define functions
 da1a2u = TrialFunction(V)
@@ -90,6 +52,7 @@ da1a2u = TrialFunction(V)
 
 
 # Parameters
+kappa = Constant(1);
 Hin = input("External Magnetic field? ")
 H = Constant(Hin);
 rlx_par_in = input("relaxation parameter? ")
@@ -149,7 +112,7 @@ u = a1a2u.sub(2, deepcopy=True)
 #a1a2u_out.close()
 
 
-pie = assemble((1/(l*l))*((1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u)) + (a1**2+a2**2)*u**2 + inner(curl(a1 ,a2-Ae), curl(a1 ,a2-Ae) ))*dx )
+pie = assemble((1/(4*l*l))*((1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u)) + (a1**2+a2**2)*u**2 + inner(curl(a1 ,a2-Ae), curl(a1 ,a2-Ae) ))*dx )
 #divide by volume, 4l^2-πr^2.
 print("Energy density =", pie)
 
@@ -163,6 +126,7 @@ plt.show()
 plot(a2)
 plt.title(r"$A_2(x)$",fontsize=26)
 plt.show()
+
 
 
 
