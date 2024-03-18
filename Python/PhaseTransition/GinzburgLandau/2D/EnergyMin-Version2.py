@@ -1,26 +1,5 @@
-#Here we solve the 2D Ginzbug Landau problem with an applied magnetic field.
-#Here we want to use Energy minimization method. We start off with Gradient Descent.
-#HEre a1 is \ve{A}\cdot e_1, a2 is \ve{A}\cdot e_2, u is u. However, \theta=t
-#======================================================================================================
-#The way the Code works
-#1. The input to the code is:
-#   a. The external field
-#   b. The relaxation parameter
-#   c. The absolute tolerance
-#2. When reading from and writing into respective files,
-#   we are writing the lagrange multiplier as a constant function
-#   When reading the functions, we interpolate onto a space VAu.
-#======================================================================================================
-#Things to keep in mind about writing this code:-
-#1. Define a functoon to evaluate the curl
-#2. Define a rotation funciton.
-#3. HAve replace L with l throught.
-#4. All variables are lower case.
-#5. REdo the code by using Hn\cdot B\perp
-#6. Implement Nesterov acceleration, momentum, minibatch gradient descent and Noisy Gradient Descent.
-#7. put in initial conditions for vortex solution.
-#======================================================================================================
-#ISSUES WITH THE CODE:-
+#This is the same code as the prev. Only difference is we want to define 
+#the variables as Coefficients here.
 
 
 import dolfin
@@ -50,10 +29,14 @@ Vcoord = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
 
 
 # Define functions
-a1a2tu = Function(V)
-(a1, a2, t, u) = split(a1a2tu)
-a1a2tu_up = Function(V)
-(a1_up, a2_up, t_up, u_up) = split(a1a2tu_up)
+a1 = Function(Vcoord)
+a2 = Function(Vcoord)
+t = Function(Vcoord)
+u = Function(Vcoord)
+a1_up = Function(Vcoord)
+a2_up = Function(Vcoord)
+t_up = Function(Vcoord)
+u_up = Function(Vcoord)
 
 # Parameters
 gamma = float(0.01) # Learning rate.
@@ -61,7 +44,7 @@ NN = int(input('Number of iterations?\n')) # Number of iterations
 Hin = input("External Magnetic field? ")
 H = Constant(Hin);
 tol_in = input("absolute tolerance? ")
-tol = Constant(tol_in);
+tol = float(tol_in);
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
 
 
@@ -81,22 +64,17 @@ Fu = derivative(Pi, u)
 
 ##Setting up the initial conditions
 ##SC state
-#A1 = Expression("0.0", degree=2)
-#A2 = Expression("0.0", degree=2)
-#T = Expression("1.0", degree=2)
-#U = Expression("1.0", degree=2)
-##Normal state
-#A1 = Expression("0.0", degree=2)
-#A2 = Expression("H*x[0]", H=H, degree=2)
-#T = Expression("0.0", degree=2)
-#U = Expression("0.0", degree=2)
-#PErturbed normal state
-A1 = Expression("H*x[1]", degree=2)
-A2 = Expression("H*x[0]", H=H, degree=2)
-T = Expression("x[1]-x[0]", degree=2)
-U = Expression("1.0", degree=2)
+#A1 = interpolate( Expression("0.0", degree=2), Vcoord)
+#A2 = interpolate( Expression("0.0", degree=2), Vcoord)
+#T = interpolate( Expression("1.0", degree=2), Vcoord)
+#U = interpolate( Expression("1.0", degree=2), Vcoord)
+#Normal state
+A1 = interpolate( Expression("0.0", degree=2), Vcoord)
+A2 = interpolate( Expression("H*x[0]", H=H, degree=2), Vcoord)
+T = interpolate( Expression("x[1]", degree=2), Vcoord)
+U = interpolate( Expression("x[0]", degree=2), Vcoord)
 #Vortex Solution.
-#..... Complete
+#..... need to complete
 #---------------------------------------------------------------------------------------------------------------
 ##Reading input from a .xdmf file.
 #a1a2u = Function(V)
@@ -135,9 +113,15 @@ for tt in range(NN):
  a2_up.vector()[:] = a2.vector()[:] - gamma*Fa2_vec[:]
  t_up.vector()[:] = t.vector()[:] - gamma*Ft_vec[:]
  u_up.vector()[:] = u.vector()[:] - gamma*Fu_vec[:]
- if ( norm(Fa1_vec) + norm(Fa2_vec) + norm(Ft_vec) + norm(Fu_vec) ) < tol:
+ print(Fa1_vec.get_local()) # prints the vector.
+ print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
+ tol_test = np.linalg.norm(np.asarray(Fa1_vec.get_local()))\
+           +np.linalg.norm(np.asarray(Fa2_vec.get_local()))\
+           +np.linalg.norm(np.asarray(Ft_vec.get_local()))\
+           +np.linalg.norm(np.asarray(Fu_vec.get_local()))
+ print(tol_test)
+ if float(tol_test)  < tol :
   break
- #print(F_vec.get_local()) # prints the vector.
  
 
 ##Save solution in a .xdmf file
@@ -154,7 +138,7 @@ a1a2tu_out.write_checkpoint(u, "u", 0, XDMFFile.Encoding.HDF5, False) #false mea
 a1a2tu_out.close()
 
 
-pie = assemble((1/(l*l))*((1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u)) \
+pie = assemble((1/(lx*ly))*((1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u)) \
                         + ( (a1-t.dx(0))**2 + (a2-t.dx(1))**2 )*u**2 \
                             + inner( curl(a1 ,a2-Ae), curl(a1 ,a2-Ae) ) )*dx )
 print("Energy density =", pie)
