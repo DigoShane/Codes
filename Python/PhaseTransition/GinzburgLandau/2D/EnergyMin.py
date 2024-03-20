@@ -58,12 +58,12 @@ t_up = Function(V)
 u_up = Function(V)
 
 # Parameters
-gamma = float(input('Learning rate?')) # Learning rate.
-NN = int(input('Number of iterations?')) # Number of iterations
-H = Constant(input("External Magnetic field? "));
-tol = float(input("absolute tolerance?"))
+gamma = float(input('Learning rate? -->')) # Learning rate.
+NN = int(input('Number of iterations? -->')) # Number of iterations
+H = Constant(input("External Magnetic field? -->"));
+tol = float(input("absolute tolerance? --> "))
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
-read_in = int(input("Read from file? 1 for Yes, 0 for No"))
+read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
 
 def curl(a1,a2):
     return a2.dx(0) - a1.dx(1)
@@ -144,17 +144,26 @@ for tt in range(NN):
   break
  
 
-##Save solution in a .xdmf file
+##Save solution in a .xdmf file and for paraview.
 a1a2tu_out = XDMFFile('GL-2DEnrg-0.xdmf')
 a1a2tu_out.write_checkpoint(a1, "a1", 0, XDMFFile.Encoding.HDF5, False) #false means not appending to file
+pvd_file = File("GL-2DEnrg-0.pvd") # for paraview. 
+pvd_file << a1
 a1a2tu_out.close()
 a1a2tu_out = XDMFFile('GL-2DEnrg-1.xdmf')
 a1a2tu_out.write_checkpoint(a2, "a2", 0, XDMFFile.Encoding.HDF5, False) #false means not appending to file
+pvd_file = File("GL-2DEnrg-1.pvd") # for paraview. 
+pvd_file << a2
 a1a2tu_out.close()
 a1a2tu_out = XDMFFile('GL-2DEnrg-2.xdmf')
 a1a2tu_out.write_checkpoint(t, "t", 0, XDMFFile.Encoding.HDF5, False) #false means not appending to file
+pvd_file = File("GL-2DEnrg-2.pvd") # for paraview.
+pvd_file << t
+a1a2tu_out.close()
 a1a2tu_out = XDMFFile('GL-2DEnrg-3.xdmf')
 a1a2tu_out.write_checkpoint(u, "u", 0, XDMFFile.Encoding.HDF5, False) #false means not appending to file
+pvd_file = File("GL-2DEnrg-3.pvd") 
+pvd_file << u
 a1a2tu_out.close()
 
 
@@ -176,5 +185,4 @@ plt.show()
 plot(t)
 plt.title(r"$\theta(x)$",fontsize=26)
 plt.show()
-
 
