@@ -82,11 +82,13 @@ Fu = derivative(Pi, u)
 ##Setting up the initial conditions
 if read_in == 0: # We want to use the standard values.
  #SC state
+ print("Using bulk SC as initial condition")
  A1 = interpolate( Expression("0.0", degree=2), V)
  A2 = interpolate( Expression("0.0", degree=2), V)
  T = interpolate( Expression("1.0", degree=2), V)
  U = interpolate( Expression("1.0", degree=2), V)
  ##Modified normal state
+ #print("Using modified bulk Normal as initial condition")
  #A1 = interpolate( Expression("0.0", degree=2), V)
  #A2 = interpolate( Expression("H*x[0]", H=H, degree=2), V)
  #T = interpolate( Expression("x[1]", degree=2), V)
@@ -96,6 +98,7 @@ if read_in == 0: # We want to use the standard values.
 ###---------------------------------------------------------------------------------------------------------------
 elif read_in == 1: # We want to read from xdmf files
  #Reading input from a .xdmf file.
+ print("reading in previous output as initial condition.")
  A1 = Function(V)
  A2 = Function(V)
  T = Function(V)
@@ -173,16 +176,20 @@ pie = assemble((1/(lx*ly))*((1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u))
 print("Energy density =", pie)
 
 
-plot(u)
+c = plot(u)
 plt.title(r"$u(x)$",fontsize=26)
+plt.colorbar(c)
 plt.show()
-plot(a1)
+c = plot(a1)
 plt.title(r"$A_1(x)$",fontsize=26)
+plt.colorbar(c)
 plt.show()
-plot(a2)
+c = plot(a2)
 plt.title(r"$A_2(x)$",fontsize=26)
+plt.colorbar(c)
 plt.show()
-plot(t)
+c = plot(t)
 plt.title(r"$\theta(x)$",fontsize=26)
+plt.colorbar(c)
 plt.show()
 

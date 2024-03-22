@@ -1,6 +1,8 @@
 #the objective of this code is to represent a surface plot. The standard plot due to matplotlib in FEniCS, can't do surface plot.
-#This code tells us how we can achieve that.
-#This tutorial is taken from "https://fenicsproject.org/pub/tutorial/html/._ftut1020.html"
+#To do 3D plots I use paraview and another method.
+#The other method is to extract the data and interpolate it using numpy or scipy and then plot it.
+# Spoiler alter, the last method doesnt work very well. 
+#After tinkering for about half a day, I just decided to go with paraview.
 #---------------------------------------------------------------------------------------------------------
 # Solving the heat equation in 2D with T(x_1=0)=T(x_1=1)=0.
 #There is a heat source f at (0.5,0.5) with flux boundary conditions (g) at x_2=0 and x_2=1.
