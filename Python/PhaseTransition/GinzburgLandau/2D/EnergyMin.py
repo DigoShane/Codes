@@ -37,15 +37,21 @@ from ufl import tanh
 import matplotlib.pyplot as plt
 import mshr
 
+#Parameters
+kappa = Constant(2.0)
+lx = float(input("lx? --> "))
+ly = float(input("ly? --> "))
+gamma = float(input('Learning rate? -->')) # Learning rate.
+NN = int(input('Number of iterations? -->')) # Number of iterations
+H = Constant(input("External Magnetic field? -->"));
+tol = float(input("absolute tolerance? --> "))
+read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
 
 #Create mesh and define function space
-lx = 10
-ly = 10
-kappa = Constant(2.0)
 mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), np.ceil(lx*10/kappa), np.ceil(ly*10/kappa), "crossed")
 x = SpatialCoordinate(mesh)
+Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
 V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
-
 
 # Define functions
 a1 = Function(V)
@@ -56,14 +62,6 @@ a1_up = Function(V)
 a2_up = Function(V)
 t_up = Function(V)
 u_up = Function(V)
-
-# Parameters
-gamma = float(input('Learning rate? -->')) # Learning rate.
-NN = int(input('Number of iterations? -->')) # Number of iterations
-H = Constant(input("External Magnetic field? -->"));
-tol = float(input("absolute tolerance? --> "))
-Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
-read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
 
 def curl(a1,a2):
     return a2.dx(0) - a1.dx(1)
@@ -173,7 +171,15 @@ a1a2tu_out.close()
 pie = assemble((1/(lx*ly))*((1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u)) \
                         + ( (a1-t.dx(0))**2 + (a2-t.dx(1))**2 )*u**2 \
                             + inner( curl(a1 ,a2-Ae), curl(a1 ,a2-Ae) ) )*dx )
-print("Energy density =", pie)
+print("Energy density is", pie)
+print("gamma = ", gamma)
+print("kappa = ", kappa)
+print("lx = ", lx)
+print("ly = ", ly)
+print("NN = ", NN)
+print("H = ", H)
+print("tol = ", tol)
+print("read_in = ", read_in)
 
 
 c = plot(u)
