@@ -14,6 +14,8 @@
 #2. When reading from and writing into respective files,
 #   we are writing the lagrange multiplier as a constant function
 #   When reading the functions, we interpolate onto a space VAu.
+#IMPORTANT:-
+# At each step we do $\theta\mapsto\theta mod 2\pi$.
 #======================================================================================================
 #Things to keep in mind about writing this code:-
 #1. Define a functoon to evaluate the curl
@@ -37,6 +39,9 @@ from ufl import tanh
 import matplotlib.pyplot as plt
 import mshr
 
+import sys
+np.set_printoptions(threshold=sys.maxsize)
+
 #Parameters
 kappa = Constant(2.0)
 lx = float(input("lx? --> "))
@@ -48,7 +53,8 @@ tol = float(input("absolute tolerance? --> "))
 read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
 
 #Create mesh and define function space
-mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), np.ceil(lx*10/kappa), np.ceil(ly*10/kappa), "crossed")
+#mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), np.ceil(lx*10/kappa), np.ceil(ly*10/kappa), "crossed")
+mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 3, 3, "crossed")
 x = SpatialCoordinate(mesh)
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
 V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
@@ -120,11 +126,19 @@ a1_up.vector()[:] = A1.vector()[:]
 a2_up.vector()[:] = A2.vector()[:]
 t_up.vector()[:] = T.vector()[:]
 u_up.vector()[:] = U.vector()[:]
+print(len(t_up.vector()))
 
 for tt in range(NN):
  a1.vector()[:] = a1_up.vector()[:]
  a2.vector()[:] = a2_up.vector()[:]
- t.vector()[:] = t_up.vector()[:]
+ #print("============================================================")
+ #print("before modding the previous output")
+ #print(t_up.vector()[:])
+ #print(len(t_up.vector()[:]))
+ t.vector()[:] = t_up.vector()[:] % (2*np.pi) # doing mod 2\pi
+ #print("============================================================")
+ #print("after modding the previous output")
+ #print(t.vector()[:])
  u.vector()[:] = u_up.vector()[:]
  Fa1_vec = assemble(Fa1)
  Fa2_vec = assemble(Fa2)
@@ -140,7 +154,7 @@ for tt in range(NN):
            +np.linalg.norm(np.asarray(Fa2_vec.get_local()))\
            +np.linalg.norm(np.asarray(Ft_vec.get_local()))\
            +np.linalg.norm(np.asarray(Fu_vec.get_local()))
- print(tol_test)
+ #print(tol_test)
  if float(tol_test)  < tol :
   break
  
