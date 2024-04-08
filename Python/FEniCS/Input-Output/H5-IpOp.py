@@ -1,6 +1,6 @@
 #The objective is to implement input output using the HDF5 format
 #This should be more robust than writing the output to a .csv file
-# or allow for mized elements unlike the XDMF file.
+# or allow for mixed elements unlike the XDMF file.
 #-----------------------------------------------------------------
 #I will achieve this using the simple Poisson equation example. 
 #I will read f from a file "xdmf-input.xdmf" and write u to "xdmf-output.xdmf"

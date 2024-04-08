@@ -28,6 +28,9 @@
 #======================================================================================================
 #ISSUES WITH THE CODE:-
 
+import time # timing for performance test.
+t0 = time.time()
+
 import dolfin
 print(f"DOLFIN version: {dolfin.__version__}")
 from dolfin import *
@@ -213,3 +216,6 @@ plt.title(r"$\theta(x)$",fontsize=26)
 plt.colorbar(c)
 plt.show()
 
+t1 = time.time()
+
+print("time taken for code to run = ", t1-t0)
