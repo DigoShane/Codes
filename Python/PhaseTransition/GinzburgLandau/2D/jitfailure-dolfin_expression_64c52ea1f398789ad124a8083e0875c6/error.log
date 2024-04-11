@@ -1,0 +1,4 @@
+/var/folders/1g/ph21gtcx2bbd4j5d7qk2tnc00000gn/T/tmph3a8gt0f/dolfin_expression_64c52ea1f398789ad124a8083e0875c6.cpp:64:147: error: use of undeclared identifier 'np'
+          values[0] = (x[0]-0.5*lx)*(x[0]-0.5*lx) + (x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 : atan((x[1]-0.5*ly)/(x[0]-0.5*lx)) - 0.5*np.pi;
+                                                                                                                                                  ^
+1 error generated.

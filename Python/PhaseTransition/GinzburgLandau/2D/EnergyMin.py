@@ -146,7 +146,7 @@ for tt in range(NN):
  a1.vector()[:] = a1_up.vector()[:]
  a2.vector()[:] = a2_up.vector()[:]
  t.vector()[:] = t_up.vector()[:] % (2*np.pi) # doing mod 2\pi
- if any(t.vector()[:] < 0.0) or any(t.vector()[:] > 2*np.pi):
+ if any(t.vector()[:] < -np.pi) or any(t.vector()[:] > np.pi):
   print("============================================================")
   print("before modding the previous output")
   print(t_up.vector()[:])
