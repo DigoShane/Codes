@@ -88,12 +88,12 @@ Fu = derivative(Pi, u)
 
 ##Setting up the initial conditions
 if read_in == 0: # We want to use the standard values.
- #SC state
- print("Using bulk SC as initial condition")
- A1 = interpolate( Expression("0.0", degree=2), V)
- A2 = interpolate( Expression("0.0", degree=2), V)
- T = interpolate( Expression("1.0", degree=2), V)
- U = interpolate( Expression("1.0", degree=2), V)
+ ##SC state
+ #print("Using bulk SC as initial condition")
+ #A1 = interpolate( Expression("0.0", degree=2), V)
+ #A2 = interpolate( Expression("0.0", degree=2), V)
+ #T = interpolate( Expression("1.0", degree=2), V)
+ #U = interpolate( Expression("1.0", degree=2), V)
  ##Modified normal state
  #print("Using modified bulk Normal as initial condition")
  #A1 = interpolate( Expression("0.0", degree=2), V)
@@ -101,6 +101,18 @@ if read_in == 0: # We want to use the standard values.
  #T = interpolate( Expression("x[1]", degree=2), V)
  #U = interpolate( Expression("x[0]", degree=2), V)
  ##Vortex Solution.
+ print("Using Vortex solution")
+ A1 = interpolate( Expression('sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)) <= r + DOLFIN_EPS ? -x[1] : \
+                             -exp(-sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))) \
+                              *x[1]/sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))*1/K', \
+                                lx=lx, ly=ly, r=0.3517, K=kappa, degree=2), V)
+ A2 = interpolate( Expression('sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)) <= r + DOLFIN_EPS ? x[0] : \
+                             exp(-sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))) \
+                              *x[0]/sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))*1/K', \
+                                lx=lx, ly=ly, r=0.3517, K=kappa, degree=2), V)
+ T = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
+                             : atan((x[1]-0.5*ly)/(x[0]-0.5*lx))', lx=lx, ly=ly, r=0.001, degree=2), V)
+ U = interpolate( Expression('tanh(sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)))', lx=lx, ly=ly, degree=2), V) 
  #..... need to complete
 ###---------------------------------------------------------------------------------------------------------------
 elif read_in == 1: # We want to read from xdmf files
