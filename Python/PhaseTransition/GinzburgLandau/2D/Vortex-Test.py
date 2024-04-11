@@ -29,7 +29,7 @@ x = SpatialCoordinate(mesh)
 V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
 
 #Plotting \theta = arctan(x)
-t = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx) + (x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 : atan((x[1]-0.5*ly)/(x[0]-0.5*lx))', lx=lx, ly=ly, r=r, degree=2), V)
+t = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx) + (x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=r, degree=2), V)
 
 #Plotting u(x) = tanh(|x|)
 u = interpolate( Expression('tanh(sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)))', lx=lx, ly=ly, degree=2), V)

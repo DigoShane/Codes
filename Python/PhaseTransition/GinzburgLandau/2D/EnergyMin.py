@@ -111,7 +111,7 @@ if read_in == 0: # We want to use the standard values.
                               *x[0]/sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))*1/K', \
                                 lx=lx, ly=ly, r=0.3517, K=kappa, degree=2), V)
  T = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
-                             : atan((x[1]-0.5*ly)/(x[0]-0.5*lx))', lx=lx, ly=ly, r=0.001, degree=2), V)
+                             : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=2), V)
  U = interpolate( Expression('tanh(sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)))', lx=lx, ly=ly, degree=2), V) 
  #..... need to complete
 ###---------------------------------------------------------------------------------------------------------------
