@@ -113,7 +113,6 @@ if read_in == 0: # We want to use the standard values.
  T = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
                              : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=2), V)
  U = interpolate( Expression('tanh(sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)))', lx=lx, ly=ly, degree=2), V) 
- #..... need to complete
 ###---------------------------------------------------------------------------------------------------------------
 elif read_in == 1: # We want to read from xdmf files
  #Reading input from a .xdmf file.
@@ -146,7 +145,7 @@ for tt in range(NN):
  a1.vector()[:] = a1_up.vector()[:]
  a2.vector()[:] = a2_up.vector()[:]
  t.vector()[:] = t_up.vector()[:] % (2*np.pi) # doing mod 2\pi
- if any(t.vector()[:] < -np.pi) or any(t.vector()[:] > np.pi):
+ if any(t.vector()[:] < 0) or any(t.vector()[:] > 2*np.pi):
   print("============================================================")
   print("before modding the previous output")
   print(t_up.vector()[:])
