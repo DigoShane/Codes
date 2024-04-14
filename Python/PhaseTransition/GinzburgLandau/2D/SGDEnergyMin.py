@@ -4,16 +4,27 @@
 #------------------------------------------------------------------------------------------------------
 # For details on progress, visit the overleaf file:-
 #1. Overleaf. superconductivity-Pradeep+Liping/Z3-Coding.tex/Sec. Stochastic Energy minimization methods
-# /subsec. Gradient Descent in FEniCS/paragraph{Wrote a 2D Ginzburg LAndau Energy minimization code}
+# /subsec. Wrote a 2D Ginzburg LAndau Stochastic Energy minimization code
+#======================================================================================================
+# The different stochastic methods implemented in this code are:-
+# 0. Gradient Descent
+# 1. Random Stochastic Gradient Descent
+#    We add a noise to the gradient descent.
+#    Instead of sampling noise from a sphere, I am sampling from a box.
+# 2. Nesterov Momentum 
+#    the gradient is evaluated at a later step. In general the moentum method saves graadients from previous steps.
+# 3. Momentum method
+#    v_{t+1} = \tau v_t - \eta \nabla f(x_t)
+#    x_{t+1} = x_t + v_{t+1}
+#The stochastic part of the update is saved in the variable {ma1,ma2,mt,mu}.
 #======================================================================================================
 #The way the Code works
 #1. The input to the code is:
 #   a. The external field
 #   b. The relaxation parameter
 #   c. The absolute tolerance
-#2. When reading from and writing into respective files,
-#   we are writing the lagrange multiplier as a constant function
-#   When reading the functions, we interpolate onto a space VAu.
+#   d. The number of iterations
+#   e. read_in parameter to state if we start from specified initial conditions or output of previous iteration.
 #======================================================================================================
 #Things to keep in mind about writing this code:-
 #1. Define a functoon to evaluate the curl
@@ -21,10 +32,11 @@
 #3. HAve replace L with l throught.
 #4. All variables are lower case.
 #5. REdo the code by using Hn\cdot B\perp
-#6. Implement Nesterov acceleration, momentum, minibatch gradient descent and Noisy Gradient Descent.
-#7. put in initial conditions for vortex solution.
 #======================================================================================================
 #ISSUES WITH THE CODE:-
+
+import time # timing for performance test.
+t0 = time.time()
 
 import dolfin
 print(f"DOLFIN version: {dolfin.__version__}")
@@ -35,8 +47,9 @@ import ufl
 print(f" UFL version: {ufl.__version__}")
 from ufl import tanh
 import matplotlib.pyplot as plt
-import mshr
-
+#import mshr
+import random
+import sys
 
 #Create mesh and define function space
 lx = 10
@@ -64,6 +77,10 @@ H = Constant(input("External Magnetic field? -->"));
 tol = float(input("absolute tolerance? --> "))
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
 read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
+random_no_method = int(input("0 for Gradient Descent, 1 for Random Stochastic Gradient Descent, 2 for Nesterov, 3 for normal momentum --> "))
+tau = float(input("tau? --> ")) # stochastic parameter
+if tau < 0 or tau > 1:
+  sys.exit("tau cannot be negative")
 
 def curl(a1,a2):
     return a2.dx(0) - a1.dx(1)
@@ -115,7 +132,6 @@ elif read_in == 1: # We want to read from xdmf files
  #plt.title(r"$u(x)-b4$",fontsize=26)
  #plt.show()
 else:
- import sys
  sys.exit("Not a valid input for read_in.")
 
 a1_up.vector()[:] = A1.vector()[:]
@@ -132,10 +148,43 @@ for tt in range(NN):
  Fa2_vec = assemble(Fa2)
  Ft_vec = assemble(Ft)
  Fu_vec = assemble(Fu)
- a1_up.vector()[:] = a1.vector()[:] - gamma*Fa1_vec[:]
- a2_up.vector()[:] = a2.vector()[:] - gamma*Fa2_vec[:]
- t_up.vector()[:] = t.vector()[:] - gamma*Ft_vec[:]
- u_up.vector()[:] = u.vector()[:] - gamma*Fu_vec[:]
+ if tt == 0: # For the first iteration, we have to do a standard gradient descent step.
+  ma1_vec = [0.0 for _ in range(len(Fa1_vec))] 
+  ma2_vec = [0.0 for _ in range(len(Fa2_vec))] 
+  mt_vec = [0.0 for _ in range(len(Ft_vec))] 
+  mu_vec = [0.0 for _ in range(len(Fu_vec))]
+ if random_no_method == 0: # Gradient Descent.
+  a1_up.vector()[:] = a1.vector()[:] - gamma*Fa1_vec[:]
+  a2_up.vector()[:] = a2.vector()[:] - gamma*Fa2_vec[:]
+  t_up.vector()[:] = t.vector()[:] - gamma*Ft_vec[:]
+  u_up.vector()[:] = u.vector()[:] - gamma*Fu_vec[:]
+ elif random_no_method == 1: # Random Stochastic Gradient Descent.
+  ma1_vec = [random.uniform(0,tau) for _ in range(len(Fa1_vec))] 
+  ma2_vec = [random.uniform(0,tau) for _ in range(len(Fa2_vec))] 
+  mt_vec = [random.uniform(0,tau) for _ in range(len(Ft_vec))] 
+  mu_vec = [random.uniform(0,tau) for _ in range(len(Fu_vec))]
+  a1_up.vector()[:] = a1.vector()[:] - gamma*(Fa1_vec[:] + ma1_vec)
+  a2_up.vector()[:] = a2.vector()[:] - gamma*(Fa2_vec[:] + ma2_vec)
+  t_up.vector()[:] = t.vector()[:] - gamma*(Ft_vec[:] + mt_vec)
+  u_up.vector()[:] = u.vector()[:] - gamma*(Fu_vec[:] + mu_vec)
+ elif random_no_method == 3: #normal momentum,
+  #print("tt=",tt," type of vec =",type(ma1_vec))
+  ma1_vec = [ii * tau for ii in ma1_vec]
+  ma1_vec[:] = ma1_vec[:] - gamma*Fa1_vec[:] 
+  a1_up.vector()[:] = a1.vector()[:] + ma1_vec
+  ma2_vec = [ii * tau for ii in ma2_vec]
+  ma2_vec[:] = ma2_vec[:] - gamma*Fa2_vec[:] 
+  a2_up.vector()[:] = a2.vector()[:] + ma2_vec
+  mt_vec = [ii * tau for ii in mt_vec]
+  mt_vec[:] = mt_vec[:] - gamma*Ft_vec[:] 
+  t_up.vector()[:] = t.vector()[:] + mt_vec
+  mu_vec = [ii * tau for ii in mu_vec]
+  mu_vec[:] = mu_vec[:] - gamma*Fu_vec[:] 
+  u_up.vector()[:] = u.vector()[:] + mu_vec
+ elif random_no_method == 2: #Nesterov.
+   sys.exit("Not ready yet. Nesterov requires gradient at next iteration. Not sure how to supply that.")
+ else:
+  sys.exit("Not a valid input for random_no_method.")
  #print(Fa1_vec.get_local()) # prints the vector.
  #print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
  tol_test = np.linalg.norm(np.asarray(Fa1_vec.get_local()))\
@@ -193,3 +242,7 @@ plt.title(r"$\theta(x)$",fontsize=26)
 plt.colorbar(c)
 plt.show()
 
+
+t1 = time.time()
+
+print("time taken for code to run = ", t1-t0)
