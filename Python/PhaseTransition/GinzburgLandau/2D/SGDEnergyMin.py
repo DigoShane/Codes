@@ -11,10 +11,11 @@
 # 1. Random Stochastic Gradient Descent
 #    We add a noise to the gradient descent.
 #    Instead of sampling noise from a sphere, I am sampling from a box.
-# 2. Nesterov Momentum 
-#    the gradient is evaluated at a later step. In general the moentum method saves graadients from previous steps.
 # 3. Momentum method
 #    v_{t+1} = \tau v_t - \eta \nabla f(x_t)
+#    x_{t+1} = x_t + v_{t+1}
+# 2. Nesterov Momentum 
+#    v_{t+1} = \tau v_t - \eta \nabla f(x_t+\tau v_t)
 #    x_{t+1} = x_t + v_{t+1}
 #The stochastic part of the update is saved in the variable {ma1,ma2,mt,mu}.
 #======================================================================================================
@@ -148,7 +149,7 @@ for tt in range(NN):
  Fa2_vec = assemble(Fa2)
  Ft_vec = assemble(Ft)
  Fu_vec = assemble(Fu)
- if tt == 0: # For the first iteration, we have to do a standard gradient descent step.
+ if tt == 0: # For the first iteration, we generate random vec for momentum.
   ma1_vec = [0.0 for _ in range(len(Fa1_vec))] 
   ma2_vec = [0.0 for _ in range(len(Fa2_vec))] 
   mt_vec = [0.0 for _ in range(len(Ft_vec))] 
@@ -159,7 +160,7 @@ for tt in range(NN):
   t_up.vector()[:] = t.vector()[:] - gamma*Ft_vec[:]
   u_up.vector()[:] = u.vector()[:] - gamma*Fu_vec[:]
  elif random_no_method == 1: # Random Stochastic Gradient Descent.
-  ma1_vec = [random.uniform(0,tau) for _ in range(len(Fa1_vec))] 
+  ma1_vec = [random.uniform(0,tau) for _ in range(len(Fa1_vec))] # return a random vector of len Fa1_vec each elemnt less than tau. 
   ma2_vec = [random.uniform(0,tau) for _ in range(len(Fa2_vec))] 
   mt_vec = [random.uniform(0,tau) for _ in range(len(Ft_vec))] 
   mu_vec = [random.uniform(0,tau) for _ in range(len(Fu_vec))]
