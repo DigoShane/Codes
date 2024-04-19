@@ -57,7 +57,8 @@ tol = float(input("absolute tolerance? --> "))
 read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
 
 #Create mesh and define function space
-mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), np.ceil(lx*10/kappa), np.ceil(ly*10/kappa), "crossed") # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+#mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), np.ceil(lx*10/kappa), np.ceil(ly*10/kappa), "crossed") # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 5, 5, "crossed") # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
 x = SpatialCoordinate(mesh)
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
 V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
