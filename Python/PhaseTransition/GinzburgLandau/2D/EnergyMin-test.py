@@ -1,32 +1,4 @@
-#Here we solve the 2D Ginzbug Landau problem with an applied magnetic field.
-#Here we want to use Energy minimization method. We start off with Gradient Descent.
-#HEre a1 is \ve{A}\cdot e_1, a2 is \ve{A}\cdot e_2, u is u. However, \theta=t
-#------------------------------------------------------------------------------------------------------
-# For details on progress, visit the overleaf file:-
-#1. Overleaf. superconductivity-Pradeep+Liping/Z3-Coding.tex/Sec. Stochastic Energy minimization methods
-# /subsec. Gradient Descent in FEniCS/paragraph{Wrote a 2D Ginzburg LAndau Energy minimization code}
-#======================================================================================================
-#The way the Code works
-#1. The input to the code is:
-#   a. The external field
-#   b. The relaxation parameter
-#   c. The absolute tolerance
-#2. When reading from and writing into respective files,
-#   we are writing the lagrange multiplier as a constant function
-#   When reading the functions, we interpolate onto a space VAu.
-#IMPORTANT:-
-# At each step we do $\theta\mapsto\theta mod 2\pi$.
-#======================================================================================================
-#Things to keep in mind about writing this code:-
-#1. Define a functoon to evaluate the curl
-#2. Define a rotation funciton.
-#3. HAve replace L with l throught.
-#4. All variables are lower case.
-#5. REdo the code by using Hn\cdot B\perp
-#6. Implement Nesterov acceleration, momentum, minibatch gradient descent and Noisy Gradient Descent.
-#7. put in initial conditions for vortex solution.
-#======================================================================================================
-#ISSUES WITH THE CODE:-
+#This is a version of Energy min that is used to work with 
 
 import time # timing for performance test.
 t0 = time.time()
