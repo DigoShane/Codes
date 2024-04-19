@@ -37,7 +37,6 @@
 #ISSUES WITH THE CODE:-
 
 import time # timing for performance test.
-t0 = time.time()
 
 import dolfin
 print(f"DOLFIN version: {dolfin.__version__}")
@@ -83,6 +82,8 @@ tau = float(input("tau? --> ")) # stochastic parameter
 if tau < 0 or tau > 1:
   sys.exit("tau cannot be negative")
 
+t0 = time.time() #Start timing
+
 def curl(a1,a2):
     return a2.dx(0) - a1.dx(1)
 
@@ -99,18 +100,18 @@ Fu = derivative(Pi, u)
 
 ##Setting up the initial conditions
 if read_in == 0: # We want to use the standard values.
- #SC state
- print("Using bulk SC as initial condition")
- A1 = interpolate( Expression("0.0", degree=2), V)
- A2 = interpolate( Expression("0.0", degree=2), V)
- T = interpolate( Expression("1.0", degree=2), V)
- U = interpolate( Expression("1.0", degree=2), V)
- ##Modified normal state
- #print("Using modified bulk Normal as initial condition")
+ ##SC state
+ #print("Using bulk SC as initial condition")
  #A1 = interpolate( Expression("0.0", degree=2), V)
- #A2 = interpolate( Expression("H*x[0]", H=H, degree=2), V)
- #T = interpolate( Expression("x[1]", degree=2), V)
- #U = interpolate( Expression("x[0]", degree=2), V)
+ #A2 = interpolate( Expression("0.0", degree=2), V)
+ #T = interpolate( Expression("1.0", degree=2), V)
+ #U = interpolate( Expression("1.0", degree=2), V)
+ #Modified normal state
+ print("Using modified bulk Normal as initial condition")
+ A1 = interpolate( Expression("0.0", degree=2), V)
+ A2 = interpolate( Expression("H*x[0]", H=H, degree=2), V)
+ T = interpolate( Expression("x[1]", degree=2), V)
+ U = interpolate( Expression("x[0]", degree=2), V)
  ##Vortex Solution.
  #..... need to complete
 ###---------------------------------------------------------------------------------------------------------------
@@ -226,6 +227,8 @@ pie = assemble((1/(lx*ly))*((1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u))
 print("Energy density =", pie)
 
 
+t1 = time.time() #end timer.
+
 c = plot(u)
 plt.title(r"$u(x)$",fontsize=26)
 plt.colorbar(c)
@@ -243,7 +246,5 @@ plt.title(r"$\theta(x)$",fontsize=26)
 plt.colorbar(c)
 plt.show()
 
-
-t1 = time.time()
 
 print("time taken for code to run = ", t1-t0)

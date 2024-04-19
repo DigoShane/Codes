@@ -71,6 +71,11 @@ a1_up = Function(V)
 a2_up = Function(V)
 t_up = Function(V)
 u_up = Function(V)
+#Temp functions to store the frechet derivatives
+temp_a1 = Function(V)
+temp_a2 = Function(V)
+temp_t = Function(V)
+temp_u = Function(V)
 
 def curl(a1,a2):
     return a2.dx(0) - a1.dx(1)
@@ -161,6 +166,26 @@ for tt in range(NN):
  a2_up.vector()[:] = a2.vector()[:] - gamma*Fa2_vec[:]
  t_up.vector()[:] = t.vector()[:] - gamma*Ft_vec[:]
  u_up.vector()[:] = u.vector()[:] - gamma*Fu_vec[:]
+ temp_a1.vector()[:] = Fa1_vec[:]
+ temp_a2.vector()[:] = Fa2_vec[:]
+ temp_t.vector()[:] = Ft_vec[:]
+ temp_u.vector()[:] = Fu_vec[:]
+ #c = plot(temp_u)
+ #plt.title(r"$F_{u}(x)$",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_a1)
+ #plt.title(r"$F_{a1}(x)$",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_a2)
+ #plt.title(r"$F_{a2}(x)$",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_t)
+ #plt.title(r"$F_{\theta}$(x)",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
  #print(Fa1_vec.get_local()) # prints the vector.
  #print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
  tol_test = np.linalg.norm(np.asarray(Fa1_vec.get_local()))\
