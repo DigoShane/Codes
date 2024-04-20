@@ -58,25 +58,29 @@ read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
 
 #Create mesh and define function space
 #mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), np.ceil(lx*10/kappa), np.ceil(ly*10/kappa), "crossed") # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
-mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 5, 5, "crossed") # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 3, 3) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
 x = SpatialCoordinate(mesh)
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
-V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
+#V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
+V = FunctionSpace(mesh, "DG", 2)#This is for ExtFile
 
-#Plot mesh
-plot(mesh)
-plt.show()
-
-mesh.init(0,1)
-
-for v in vertices(mesh):
-    idx = v.index()
-    neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
-    neighborhood = np.array(neighborhood).flatten()
-
-    # Remove own index from neighborhood
-    neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
-    print("Vertex %d neighborhood: " %idx, neighborhood)
+#coordinates = mesh.coordinates()
+#print(coordinates)
+#
+#mesh.init(0,1)
+#
+#for v in vertices(mesh):
+#    idx = v.index()
+#    neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
+#    neighborhood = np.array(neighborhood).flatten()
+#
+#    # Remove own index from neighborhood
+#    neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
+#    print("Vertex %d neighborhood: " %idx, neighborhood)
+#
+##Plot mesh
+#plot(mesh)
+#plt.show()
 
 # Define functions
 a1 = Function(V)
@@ -203,7 +207,7 @@ for tt in range(NN):
  #plt.colorbar(c)
  #plt.show()
  #print(Fa1_vec.get_local()) # prints the vector.
- #print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
+ print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
  tol_test = np.linalg.norm(np.asarray(Fa1_vec.get_local()))\
            +np.linalg.norm(np.asarray(Fa2_vec.get_local()))\
            +np.linalg.norm(np.asarray(Ft_vec.get_local()))\
