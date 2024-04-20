@@ -57,44 +57,47 @@ tol = float(input("absolute tolerance? --> "))
 read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
 
 #Create mesh and define function space
-mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), np.ceil(lx*10/kappa), np.ceil(ly*10/kappa), "crossed") # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
-#mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 3, 3, "crossed") # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 1+np.ceil(lx*10/kappa), 1+np.ceil(ly*10/kappa), "crossed") # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+#mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 3, 3) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
 x = SpatialCoordinate(mesh)
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
 #V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
 V = FunctionSpace(mesh, "DG", 2)#This is for ExtFile
 
-#coordinates = mesh.coordinates()
-#print(coordinates)
-#
-#mesh.init(0,1)
-#
-#for v in vertices(mesh):
-#    idx = v.index()
-#    neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
-#    neighborhood = np.array(neighborhood).flatten()
-#
-#    # Remove own index from neighborhood
-#    neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
-#    print("Vertex %d neighborhood: " %idx, neighborhood)
-#
-##Plot mesh
-#plot(mesh)
-#plt.show()
+coordinates = mesh.coordinates()
+print(coordinates)
+
+mesh.init(0,1)
+
+for v in vertices(mesh):
+    idx = v.index()
+    neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
+    neighborhood = np.array(neighborhood).flatten()
+
+    # Remove own index from neighborhood
+    neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
+    print("Vertex %d neighborhood: " %idx, neighborhood)
+
+#Plot mesh
+plot(mesh)
+plt.show()
 
 # Define functions
 a1 = Function(V)
 a2 = Function(V)
 t = Function(V)
+t1 = Function(V)
 u = Function(V)
 a1_up = Function(V)
 a2_up = Function(V)
 t_up = Function(V)
+t1_up = Function(V)
 u_up = Function(V)
 #Temp functions to store the frechet derivatives
 temp_a1 = Function(V)
 temp_a2 = Function(V)
 temp_t = Function(V)
+temp_t1 = Function(V)
 temp_u = Function(V)
 
 def curl(a1,a2):
@@ -103,11 +106,14 @@ def curl(a1,a2):
 #Defining the energy
 Pi = ( (1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u)) + ( (a1-t.dx(0))**2 + (a2-t.dx(1))**2 )*u**2 \
       + inner( curl(a1 ,a2-Ae), curl(a1 ,a2-Ae) ) )*dx
+Pi1 = ( (1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u)) + ( (a1-t1.dx(0))**2 + (a2-t1.dx(1))**2 )*u**2 \
+      + inner( curl(a1 ,a2-Ae), curl(a1 ,a2-Ae) ) )*dx
 
 #Defining the gradient
 Fa1 = derivative(Pi, a1)
 Fa2 = derivative(Pi, a2)
 Ft = derivative(Pi, t)
+Ft1 = derivative(Pi1, t1)
 Fu = derivative(Pi, u)
 
 
@@ -137,6 +143,8 @@ if read_in == 0: # We want to use the standard values.
                                 lx=lx, ly=ly, r=0.3517, K=kappa, degree=2), V)
  T = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
                              : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=2), V)
+ T1 = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
+                             : -0.5*pie+atan2(x[1]-0.5*ly,-x[0]+0.5*lx)',pie=np.pi, lx=lx, ly=ly, r=0.001, degree=2), V) # 0.5*np.pi+
  U = interpolate( Expression('tanh(sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)))', lx=lx, ly=ly, degree=2), V) 
 ###---------------------------------------------------------------------------------------------------------------
 elif read_in == 1: # We want to read from xdmf files
@@ -164,55 +172,64 @@ else:
 a1_up.vector()[:] = A1.vector()[:]
 a2_up.vector()[:] = A2.vector()[:]
 t_up.vector()[:] = T.vector()[:]
+t1_up.vector()[:] = T1.vector()[:]
 u_up.vector()[:] = U.vector()[:]
 
 for tt in range(NN):
  a1.vector()[:] = a1_up.vector()[:]
  a2.vector()[:] = a2_up.vector()[:]
- t.vector()[:] = t_up.vector()[:] % (2*np.pi) # doing mod 2\pi
- if any(t.vector()[:] < 0) or any(t.vector()[:] > 2*np.pi):
-  print("============================================================")
-  print("before modding the previous output")
-  print(t_up.vector()[:])
-  print("============================================================")
-  print("after modding the previous output")
-  print(t.vector()[:])
+ t.vector()[:] = t_up.vector()[:] 
+ t1.vector()[:] = t1_up.vector()[:] 
+ #if any(t.vector()[:] < 0) or any(t.vector()[:] > 2*np.pi):
+ # print("============================================================")
+ # print("before modding the previous output")
+ # print(t_up.vector()[:])
+ # print("============================================================")
+ # print("after modding the previous output")
+ # print(t.vector()[:])
  u.vector()[:] = u_up.vector()[:]
  Fa1_vec = assemble(Fa1)
  Fa2_vec = assemble(Fa2)
  Ft_vec = assemble(Ft)
+ Ft1_vec = assemble(Ft1)
  Fu_vec = assemble(Fu)
  a1_up.vector()[:] = a1.vector()[:] - gamma*Fa1_vec[:]
  a2_up.vector()[:] = a2.vector()[:] - gamma*Fa2_vec[:]
  t_up.vector()[:] = t.vector()[:] - gamma*Ft_vec[:]
+ t1_up.vector()[:] = t1.vector()[:] - gamma*Ft1_vec[:]
  u_up.vector()[:] = u.vector()[:] - gamma*Fu_vec[:]
  temp_a1.vector()[:] = Fa1_vec[:]
  temp_a2.vector()[:] = Fa2_vec[:]
  temp_t.vector()[:] = Ft_vec[:]
+ temp_t1.vector()[:] = Ft1_vec[:]
  temp_u.vector()[:] = Fu_vec[:]
- #c = plot(temp_u)
- #plt.title(r"$F_{u}(x)$",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
- #c = plot(temp_a1)
- #plt.title(r"$F_{a1}(x)$",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
- #c = plot(temp_a2)
- #plt.title(r"$F_{a2}(x)$",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
- #c = plot(temp_t)
- #plt.title(r"$F_{\theta}$(x)",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
+ c = plot(temp_u)
+ plt.title(r"$F_{u}(x)$",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_a1)
+ plt.title(r"$F_{a1}(x)$",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_a2)
+ plt.title(r"$F_{a2}(x)$",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_t)
+ plt.title(r"$F_{\theta}$(x)",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_t1)
+ plt.title(r"$F_{\theta1}$(x)",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
  #print(Fa1_vec.get_local()) # prints the vector.
- print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
+ #print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
  tol_test = np.linalg.norm(np.asarray(Fa1_vec.get_local()))\
            +np.linalg.norm(np.asarray(Fa2_vec.get_local()))\
            +np.linalg.norm(np.asarray(Ft_vec.get_local()))\
            +np.linalg.norm(np.asarray(Fu_vec.get_local()))
- #print(tol_test)
+ print(tol_test)
  if float(tol_test)  < tol :
   break
  
@@ -243,6 +260,8 @@ a1a2tu_out.close()
 pie = assemble((1/(lx*ly))*((1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u)) \
                         + ( (a1-t.dx(0))**2 + (a2-t.dx(1))**2 )*u**2 \
                             + inner( curl(a1 ,a2-Ae), curl(a1 ,a2-Ae) ) )*dx )
+
+
 print("================output of code========================")
 print("Energy density is", pie)
 print("gamma = ", gamma)
@@ -254,6 +273,18 @@ print("H = ", H)
 print("tol = ", tol, ", ", float(tol_test))
 print("read_in = ", read_in)
 
+c = plot(U)
+plt.title(r"$U(x)$",fontsize=26)
+plt.colorbar(c)
+plt.show()
+c = plot(T)
+plt.title(r"$T(x)$",fontsize=26)
+plt.colorbar(c)
+plt.show()
+c = plot(T1)
+plt.title(r"$T1(x)$",fontsize=26)
+plt.colorbar(c)
+plt.show()
 
 c = plot(u)
 plt.title(r"$u(x)$",fontsize=26)

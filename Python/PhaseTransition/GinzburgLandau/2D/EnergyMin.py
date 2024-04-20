@@ -57,12 +57,12 @@ tol = float(input("absolute tolerance? --> "))
 read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
 
 #Create mesh and define function space
-#mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), np.ceil(lx*10/kappa), np.ceil(ly*10/kappa), "crossed") # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
-mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 3, 3) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 1+np.ceil(lx*10/kappa), 1+np.ceil(ly*10/kappa), "crossed") # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+#mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 3, 3) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
 x = SpatialCoordinate(mesh)
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
-#V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
-V = FunctionSpace(mesh, "DG", 2)#This is for ExtFile
+V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
+Vt = FunctionSpace(mesh, "DG", 2)#This is for ExtFile
 
 #coordinates = mesh.coordinates()
 #print(coordinates)
@@ -85,16 +85,16 @@ V = FunctionSpace(mesh, "DG", 2)#This is for ExtFile
 # Define functions
 a1 = Function(V)
 a2 = Function(V)
-t = Function(V)
+t = Function(Vt)
 u = Function(V)
 a1_up = Function(V)
 a2_up = Function(V)
-t_up = Function(V)
+t_up = Function(Vt)
 u_up = Function(V)
 #Temp functions to store the frechet derivatives
 temp_a1 = Function(V)
 temp_a2 = Function(V)
-temp_t = Function(V)
+temp_t = Function(Vt)
 temp_u = Function(V)
 
 def curl(a1,a2):
@@ -136,7 +136,7 @@ if read_in == 0: # We want to use the standard values.
                               *x[0]/sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))*1/K', \
                                 lx=lx, ly=ly, r=0.3517, K=kappa, degree=2), V)
  T = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
-                             : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=2), V)
+                             : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=2), Vt)
  U = interpolate( Expression('tanh(sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)))', lx=lx, ly=ly, degree=2), V) 
 ###---------------------------------------------------------------------------------------------------------------
 elif read_in == 1: # We want to read from xdmf files
@@ -144,7 +144,7 @@ elif read_in == 1: # We want to read from xdmf files
  print("reading in previous output as initial condition.")
  A1 = Function(V)
  A2 = Function(V)
- T = Function(V)
+ T = Function(Vt)
  U = Function(V)
  a1_in =  XDMFFile("GL-2DEnrg-0.xdmf")
  a1_in.read_checkpoint(A1,"a1",0)
