@@ -1,30 +1,7 @@
-#Here we solve the 2D Ginzbug Landau problem with an applied magnetic field.
-#Here we want to use Energy minimization method. We start off with Gradient Descent.
-#HEre a1 is \ve{A}\cdot e_1, a2 is \ve{A}\cdot e_2, u is u. However, \theta=t
-#------------------------------------------------------------------------------------------------------
-# For details on progress, visit the overleaf file:-
-#1. Overleaf. superconductivity-Pradeep+Liping/Z3-Coding.tex/Sec. Stochastic Energy minimization methods
-# /subsec. Gradient Descent in FEniCS/paragraph{Wrote a 2D Ginzburg LAndau Energy minimization code}
+#Explicitly model disocntinuities.
 #======================================================================================================
-#The way the Code works
-#1. The input to the code is:
-#   a. The external field
-#   b. The relaxation parameter
-#   c. The absolute tolerance
-#2. When reading from and writing into respective files,
-#   we are writing the lagrange multiplier as a constant function
-#   When reading the functions, we interpolate onto a space VAu.
-#IMPORTANT:-
-# At each step we do $\theta\mapsto\theta mod 2\pi$.
-#======================================================================================================
-#Things to keep in mind about writing this code:-
-#1. Define a functoon to evaluate the curl
-#2. Define a rotation funciton.
-#3. HAve replace L with l throught.
-#4. All variables are lower case.
-#5. REdo the code by using Hn\cdot B\perp
-#6. Implement Nesterov acceleration, momentum, minibatch gradient descent and Noisy Gradient Descent.
-#7. put in initial conditions for vortex solution.
+#1. identify the nodes associated with the discontinuity.
+#2. try to modify the values of the gradients at that point.  
 #======================================================================================================
 #ISSUES WITH THE CODE:-
 
@@ -57,15 +34,15 @@ tol = float(input("absolute tolerance? --> "))
 read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
 
 #Create mesh and define function space
-mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 1+np.ceil(lx*10/kappa), 1+np.ceil(ly*10/kappa), "crossed") # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
-#mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 3, 3) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 1+np.ceil(lx*10/kappa), 1+np.ceil(ly*10/kappa)) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+#mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 5, 5) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
 x = SpatialCoordinate(mesh)
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
-#V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
-V = FunctionSpace(mesh, "DG", 2)#This is for ExtFile
+V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
+Vt = FunctionSpace(mesh, "DG", 2)#This is for ExtFile
 
-coordinates = mesh.coordinates()
-print(coordinates)
+#coordinates = mesh.coordinates()
+#print(coordinates)
 
 mesh.init(0,1)
 
@@ -85,19 +62,19 @@ plt.show()
 # Define functions
 a1 = Function(V)
 a2 = Function(V)
-t = Function(V)
-t1 = Function(V)
+t = Function(Vt)
+t1 = Function(Vt)
 u = Function(V)
 a1_up = Function(V)
 a2_up = Function(V)
-t_up = Function(V)
-t1_up = Function(V)
+t_up = Function(Vt)
+t1_up = Function(Vt)
 u_up = Function(V)
 #Temp functions to store the frechet derivatives
 temp_a1 = Function(V)
 temp_a2 = Function(V)
-temp_t = Function(V)
-temp_t1 = Function(V)
+temp_t = Function(Vt)
+temp_t1 = Function(Vt)
 temp_u = Function(V)
 
 def curl(a1,a2):
@@ -142,9 +119,9 @@ if read_in == 0: # We want to use the standard values.
                               *x[0]/sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))*1/K', \
                                 lx=lx, ly=ly, r=0.3517, K=kappa, degree=2), V)
  T = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
-                             : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=2), V)
+                             : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=2), Vt)
  T1 = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
-                             : -0.5*pie+atan2(x[1]-0.5*ly,-x[0]+0.5*lx)',pie=np.pi, lx=lx, ly=ly, r=0.001, degree=2), V) # 0.5*np.pi+
+                             : -0.5*pie+atan2(x[1]-0.5*ly,-x[0]+0.5*lx)',pie=np.pi, lx=lx, ly=ly, r=0.001, degree=2), Vt) # 0.5*np.pi+
  U = interpolate( Expression('tanh(sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)))', lx=lx, ly=ly, degree=2), V) 
 ###---------------------------------------------------------------------------------------------------------------
 elif read_in == 1: # We want to read from xdmf files
@@ -193,6 +170,21 @@ for tt in range(NN):
  Ft_vec = assemble(Ft)
  Ft1_vec = assemble(Ft1)
  Fu_vec = assemble(Fu)
+ #modifying F_t
+ for v in vertices(mesh):
+    #print("in the vertex loop")
+    idx = v.index()
+    neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
+    neighborhood = np.array(neighborhood).flatten()
+
+    # Remove own index from neighborhood
+    neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
+    for ii in neighborhood:
+     if np.absolute(t.vector()[ii] - t.vector()[idx]) >= 2*np.pi-0.001 :
+      print("t(",ii,")=",t.vector()[ii],"and t(",idx,")=",t.vector()[idx])
+     
+
+ 
  a1_up.vector()[:] = a1.vector()[:] - gamma*Fa1_vec[:]
  a2_up.vector()[:] = a2.vector()[:] - gamma*Fa2_vec[:]
  t_up.vector()[:] = t.vector()[:] - gamma*Ft_vec[:]

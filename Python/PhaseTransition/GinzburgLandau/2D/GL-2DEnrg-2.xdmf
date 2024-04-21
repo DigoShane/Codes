@@ -3,18 +3,18 @@
   <Domain>
     <Grid GridType="Collection" CollectionType="Temporal" Name="t">
       <Grid Name="t_0" GridType="Uniform">
-        <Topology NumberOfElements="10404" TopologyType="Triangle" NodesPerElement="3">
-          <DataItem Dimensions="10404 3" NumberType="UInt" Format="HDF">GL-2DEnrg-2.h5:t/t_0/mesh/topology</DataItem>
+        <Topology NumberOfElements="5202" TopologyType="Triangle" NodesPerElement="3">
+          <DataItem Dimensions="5202 3" NumberType="UInt" Format="HDF">GL-2DEnrg-2.h5:t/t_0/mesh/topology</DataItem>
         </Topology>
         <Geometry GeometryType="XY">
-          <DataItem Dimensions="5305 2" Format="HDF">GL-2DEnrg-2.h5:t/t_0/mesh/geometry</DataItem>
+          <DataItem Dimensions="2704 2" Format="HDF">GL-2DEnrg-2.h5:t/t_0/mesh/geometry</DataItem>
         </Geometry>
         <Time Value="0.000000" />
         <Attribute ItemType="FiniteElementFunction" ElementFamily="DG" ElementDegree="2" ElementCell="triangle" Name="t" Center="Other" AttributeType="Scalar">
-          <DataItem Dimensions="62424 1" NumberType="UInt" Format="HDF">GL-2DEnrg-2.h5:t/t_0/cell_dofs</DataItem>
-          <DataItem Dimensions="62424 1" NumberType="Float" Format="HDF">GL-2DEnrg-2.h5:t/t_0/vector</DataItem>
-          <DataItem Dimensions="10405 1" NumberType="UInt" Format="HDF">GL-2DEnrg-2.h5:t/t_0/x_cell_dofs</DataItem>
-          <DataItem Dimensions="10404 1" NumberType="UInt" Format="HDF">GL-2DEnrg-2.h5:t/t_0/cells</DataItem>
+          <DataItem Dimensions="31212 1" NumberType="UInt" Format="HDF">GL-2DEnrg-2.h5:t/t_0/cell_dofs</DataItem>
+          <DataItem Dimensions="31212 1" NumberType="Float" Format="HDF">GL-2DEnrg-2.h5:t/t_0/vector</DataItem>
+          <DataItem Dimensions="5203 1" NumberType="UInt" Format="HDF">GL-2DEnrg-2.h5:t/t_0/x_cell_dofs</DataItem>
+          <DataItem Dimensions="5202 1" NumberType="UInt" Format="HDF">GL-2DEnrg-2.h5:t/t_0/cells</DataItem>
         </Attribute>
       </Grid>
     </Grid>
