@@ -1,6 +1,8 @@
 #Explicitly model disocntinuities.
 #======================================================================================================
 #1. identify the nodes associated with the discontinuity.
+#   a. Check where T is discontinuous,
+#   b. Chcek to make sure that u, A and t for these variables develop a discontinuity.
 #2. try to modify the values of the gradients at that point.  
 #======================================================================================================
 #ISSUES WITH THE CODE:-
@@ -34,30 +36,24 @@ tol = float(input("absolute tolerance? --> "))
 read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
 
 #Create mesh and define function space
-mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 1+np.ceil(lx*10/kappa), 1+np.ceil(ly*10/kappa)) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
-#mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 5, 5) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+#mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 1+np.ceil(lx*10/kappa), 1+np.ceil(ly*10/kappa)) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 7, 7) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
 x = SpatialCoordinate(mesh)
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
 V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
 Vt = FunctionSpace(mesh, "DG", 2)#This is for ExtFile
 
-#coordinates = mesh.coordinates()
-#print(coordinates)
-
 mesh.init(0,1)
 
-for v in vertices(mesh):
-    idx = v.index()
-    neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
-    neighborhood = np.array(neighborhood).flatten()
+#for v in vertices(mesh):
+#    idx = v.index()
+#    neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
+#    neighborhood = np.array(neighborhood).flatten()
+#
+#    # Remove own index from neighborhood
+#    neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
+#    print("Vertex %d neighborhood: " %idx, neighborhood)
 
-    # Remove own index from neighborhood
-    neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
-    print("Vertex %d neighborhood: " %idx, neighborhood)
-
-#Plot mesh
-plot(mesh)
-plt.show()
 
 # Define functions
 a1 = Function(V)
@@ -118,10 +114,12 @@ if read_in == 0: # We want to use the standard values.
                              exp(-sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))) \
                               *x[0]/sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))*1/K', \
                                 lx=lx, ly=ly, r=0.3517, K=kappa, degree=2), V)
- T = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
-                             : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=2), Vt)
- T1 = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
-                             : -0.5*pie+atan2(x[1]-0.5*ly,-x[0]+0.5*lx)',pie=np.pi, lx=lx, ly=ly, r=0.001, degree=2), Vt) # 0.5*np.pi+
+# T = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
+#                             : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=2), Vt)
+# T1 = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
+#                             : -0.5*pie+atan2(x[1]-0.5*ly,-x[0]+0.5*lx)',pie=np.pi, lx=lx, ly=ly, r=0.001, degree=2), Vt) # 0.5*np.pi+
+ T = interpolate( Expression('atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=2), Vt)
+ T1 = interpolate( Expression('-0.5*pie+atan2(x[1]-0.5*ly,-x[0]+0.5*lx)',pie=np.pi, lx=lx, ly=ly, r=0.001, degree=2), Vt) # 0.5*np.pi+
  U = interpolate( Expression('tanh(sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)))', lx=lx, ly=ly, degree=2), V) 
 ###---------------------------------------------------------------------------------------------------------------
 elif read_in == 1: # We want to read from xdmf files
@@ -152,6 +150,38 @@ t_up.vector()[:] = T.vector()[:]
 t1_up.vector()[:] = T1.vector()[:]
 u_up.vector()[:] = U.vector()[:]
 
+##identifying the branch cut
+#check where T is dicontinuous.
+list = [];
+for v in vertices(mesh):
+    #print("in the vertex loop")
+    idx = v.index()
+    neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
+    neighborhood = np.array(neighborhood).flatten()
+
+    # Remove own index from neighborhood
+    neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
+    for ii in neighborhood:
+     print("|T(",ii,")-T(",idx,")|=",np.absolute(T.vector()[ii]-T.vector()[idx]))
+     if np.absolute(T.vector()[ii] - T.vector()[idx]) >= 2*np.pi-0.2 :
+      print("inside if")
+      list.append([ii,idx])
+      print("T(",ii,")=",T.vector()[ii],"and T(",idx,")=",T.vector()[idx])
+print(list)
+
+
+#Plot mesh
+plot(mesh)
+#plot(T.vector())
+plt.show()
+
+coordinates = mesh.coordinates()
+print(coordinates)
+
+#mesh_Test = interpolate( Expression('x[0]+x[1]', degree=1), V)
+#plot(
+
+
 for tt in range(NN):
  a1.vector()[:] = a1_up.vector()[:]
  a2.vector()[:] = a2_up.vector()[:]
@@ -170,21 +200,21 @@ for tt in range(NN):
  Ft_vec = assemble(Ft)
  Ft1_vec = assemble(Ft1)
  Fu_vec = assemble(Fu)
- #modifying F_t
- for v in vertices(mesh):
-    #print("in the vertex loop")
-    idx = v.index()
-    neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
-    neighborhood = np.array(neighborhood).flatten()
-
-    # Remove own index from neighborhood
-    neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
-    for ii in neighborhood:
-     if np.absolute(t.vector()[ii] - t.vector()[idx]) >= 2*np.pi-0.001 :
-      print("t(",ii,")=",t.vector()[ii],"and t(",idx,")=",t.vector()[idx])
-     
-
  
+ #modifying F_t
+ #for v in vertices(mesh):
+ #   #print("in the vertex loop")
+ #   idx = v.index()
+ #   neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
+ #   neighborhood = np.array(neighborhood).flatten()
+
+ #   # Remove own index from neighborhood
+ #   neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
+ #   for ii in neighborhood:
+ #    if np.absolute(t.vector()[ii] - t.vector()[idx]) >= 2*np.pi-0.001 :
+ #     print("t(",ii,")=",t.vector()[ii],"and t(",idx,")=",t.vector()[idx])
+ #    
+
  a1_up.vector()[:] = a1.vector()[:] - gamma*Fa1_vec[:]
  a2_up.vector()[:] = a2.vector()[:] - gamma*Fa2_vec[:]
  t_up.vector()[:] = t.vector()[:] - gamma*Ft_vec[:]
@@ -195,26 +225,28 @@ for tt in range(NN):
  temp_t.vector()[:] = Ft_vec[:]
  temp_t1.vector()[:] = Ft1_vec[:]
  temp_u.vector()[:] = Fu_vec[:]
- c = plot(temp_u)
- plt.title(r"$F_{u}(x)$",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a1)
- plt.title(r"$F_{a1}(x)$",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a2)
- plt.title(r"$F_{a2}(x)$",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_t)
- plt.title(r"$F_{\theta}$(x)",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_t1)
- plt.title(r"$F_{\theta1}$(x)",fontsize=26)
- plt.colorbar(c)
- plt.show()
+ 
+ #c = plot(temp_u)
+ #plt.title(r"$F_{u}(x)$",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_a1)
+ #plt.title(r"$F_{a1}(x)$",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_a2)
+ #plt.title(r"$F_{a2}(x)$",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_t)
+ #plt.title(r"$F_{\theta}$(x)",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_t1)
+ #plt.title(r"$F_{\theta1}$(x)",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+
  #print(Fa1_vec.get_local()) # prints the vector.
  #print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
  tol_test = np.linalg.norm(np.asarray(Fa1_vec.get_local()))\
