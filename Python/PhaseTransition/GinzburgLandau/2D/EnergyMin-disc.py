@@ -1,11 +1,13 @@
-#Explicitly model disocntinuities.
+Explicitly model disocntinuities.
 #======================================================================================================
 #1. identify the nodes associated with the discontinuity.
 #   a. Check where T is discontinuous,
 #   b. Chcek to make sure that u, A and t for these variables develop a discontinuity.
 #2. print the values of the nodes and check which ones are closest to the discontinuity. 
-#3. try to modify the values of the gradients at that point.  
+#3. Try to modify the values of the gradients at that point. 
+#   print \nabla \theta  and see if you have a discontinuity there. 
 #4. Get N_x, N_y from kappa. Implenet the 2*np.ceil((1+N)/2)
+#5. Properly modify theta such that it is bounded within [-\pi,\pi].
 #======================================================================================================
 #ISSUES WITH THE CODE:-
 
@@ -21,7 +23,6 @@ import ufl
 print(f" UFL version: {ufl.__version__}")
 from ufl import tanh
 import matplotlib.pyplot as plt
-import mshr
 
 import sys
 np.set_printoptions(threshold=sys.maxsize)
@@ -30,20 +31,21 @@ np.set_printoptions(threshold=sys.maxsize)
 print("================input to code========================")
 pord = int(1)# degree of polynmomials used for FEA
 kappa = Constant(2.0)
-lx = float(input("lx? --> "))
-ly = float(input("ly? --> "))
-print("choosing Nx even helps the calculations.")
+lx = float(1)
+ly = float(1)
+print("choosing Nx, Ny even helps the calculations.")
 Nx = int(input("Nx? --> "))
 Ny = int(input("Ny? --> "))
-gamma = float(input('Learning rate? -->')) # Learning rate.
+gamma = float(0.01) # Learning rate.
 NN = int(input('Number of iterations? -->')) # Number of iterations
-H = Constant(input("External Magnetic field? -->"));
-tol = float(input("absolute tolerance? --> "))
-read_in = int(input("Read from file? 1 for Yes, 0 for No --> "))
+H = Constant(0.23);
+tol = float(0.000001)
+read_in = int(0)
 
 
 #Create mesh and define function space
-#mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), 1+np.ceil(lx*10/kappa), 1+np.ceil(ly*10/kappa)) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+#Nx = 1+np.ceil(lx*10/kappa)
+#Ny = 1+np.ceil(ly*10/kappa)
 mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), Nx, Ny) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
 x = SpatialCoordinate(mesh)
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
@@ -156,26 +158,6 @@ t_up.vector()[:] = T.vector()[:]
 t1_up.vector()[:] = T1.vector()[:]
 u_up.vector()[:] = U.vector()[:]
 
-###identifying the branch cut
-##check where T is dicontinuous.
-#list = [];
-#for v in vertices(mesh):
-#    #print("in the vertex loop")
-#    idx = v.index()
-#    neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
-#    neighborhood = np.array(neighborhood).flatten()
-#
-#    # Remove own index from neighborhood
-#    neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
-#    for ii in neighborhood:
-#     print("|T(",ii,")-T(",idx,")|=",np.absolute(T.vector()[ii]-T.vector()[idx]))
-#     if np.absolute(T.vector()[ii] - T.vector()[idx]) >= 2*np.pi-0.2 :
-#      print("inside if")
-#      list.append([ii,idx])
-#      print("T(",ii,")=",T.vector()[ii],"and T(",idx,")=",T.vector()[idx])
-#print(list)
-
-
 #Plot mesh
 plot(mesh)
 #plot(T.vector())
@@ -192,20 +174,25 @@ if pord == 1:
  ##For 1D
  v2d = vertex_to_dof_map(V) # This only works for 1D elements since vertices and nodes are the same.
  print("----------------------------------------------------------------------------------------")
- print("v2d of disc",v2d[int(np.ceil(0.5*Nx)):int(np.ceil(0.5*Nx)) + int(np.ceil(0.5*Ny))*int(Ny+1):int(Ny+1)])
- print("v of disc",int(np.ceil(0.5*Nx)),int(np.ceil(0.5*Nx)) + int(np.ceil(0.5*Ny))*int(Ny+1),int(Ny+1))
- #Marker_array[v2d[int(np.ceil(0.5*Nx)):int(np.ceil(0.5*Nx)) + int(np.ceil(0.5*Ny))*int(Ny+1):int(Ny+1)]]=0
- Marker_array[v2d[int(np.ceil(0.5*Nx)):int(np.ceil(0.5*Nx)) + int(np.ceil(0.5*Ny))*int(Ny+1):int(Ny+1)]]=0
+ strt = int(np.ceil(0.5*Nx))
+ stp = int(Nx+1)
+ nd = strt + int(np.ceil(0.5*Ny+0.5))*stp
+ print("v2d of disc",v2d[strt:nd:stp])
+ print("v of disc",np.arange(strt,nd,stp))
+ print("v of disc start stop",range(strt,nd,stp))
+ #Marker_array[v2d[strt:nd:stp]]=0
+ Marker_array[v2d[strt:nd:stp]]=0
  #Marker_array[v2d[2:2+2*4:4]] = 0
  vertex_values = u.compute_vertex_values()
- print("coord of disc",vertex_values[v2d[int(np.ceil(0.5*Nx)):int(np.ceil(0.5*Nx)) + int(np.ceil(0.5*Ny))*int(Ny+1):int(Ny+1)]])
+ xcoord = mesh.coordinates()
+ print("coord of disc",xcoord[strt:nd:stp])
  print("----------------------------------------------------------------------------------------")
 else:
  sys.exit("havent implemnted pord > 1")
  ##For 2D
- print(V.tabulate_dof_coordinates())
- print(V.dofmap().entity_dofs(mesh,0))
- print(V.dofmap().entity_dofs(mesh, 1))
+ print(V.tabulate_dof_coordinates()) # this array doesnt display
+ print(V.dofmap().entity_dofs(mesh,0)) # this is the list of vertices of elements
+ print(V.dofmap().entity_dofs(mesh, 1)) # list of all the corner nodes of elements.
  element = V.element()
  dofmap = V.dofmap()
  for cell in cells(mesh):
@@ -338,15 +325,17 @@ pie = assemble((1/(lx*ly))*((1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u))
 
 
 print("================output of code========================")
-print("Energy density is", pie)
-print("gamma = ", gamma)
-print("kappa = ", kappa)
-print("lx = ", lx)
-print("ly = ", ly)
-print("NN = ", NN)
-print("H = ", H)
-print("tol = ", tol, ", ", float(tol_test))
-print("read_in = ", read_in)
+#print("Energy density is", pie)
+#print("gamma = ", gamma)
+#print("kappa = ", kappa)
+#print("lx = ", lx)
+#print("ly = ", ly)
+print("Nx = ", Nx)
+print("Ny = ", Ny)
+#print("NN = ", NN)
+#print("H = ", H)
+#print("tol = ", tol, ", ", float(tol_test))
+#print("read_in = ", read_in)
 
 #c = plot(U)
 #plt.title(r"$U(x)$",fontsize=26)
@@ -381,3 +370,4 @@ print("read_in = ", read_in)
 t1 = time.time()
 
 print("time taken for code to run = ", t1-t0)
+
