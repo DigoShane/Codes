@@ -34,3 +34,9 @@ u.vector()[:] = z
 
 plot(u)      
 plt.show()
+
+
+
+
+
+
