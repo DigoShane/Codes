@@ -1,9 +1,9 @@
-Explicitly model disocntinuities.
+#Explicitly model disocntinuities.
 #======================================================================================================
 #1. identify the nodes associated with the discontinuity.
-#   a. Check where T is discontinuous,
+#   a. Check where T is discontinuous,  "DONE"
 #   b. Chcek to make sure that u, A and t for these variables develop a discontinuity.
-#2. print the values of the nodes and check which ones are closest to the discontinuity. 
+#2. print the values of the nodes and check which ones are closest to the discontinuity.  "DONE" 
 #3. Try to modify the values of the gradients at that point. 
 #   print \nabla \theta  and see if you have a discontinuity there. 
 #4. Get N_x, N_y from kappa. Implenet the 2*np.ceil((1+N)/2)
@@ -44,6 +44,7 @@ read_in = int(0)
 
 
 #Create mesh and define function space
+#print("choosing to make Nx, Ny even helps the visulization.")
 #Nx = 1+np.ceil(lx*10/kappa)
 #Ny = 1+np.ceil(ly*10/kappa)
 mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), Nx, Ny) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
@@ -66,21 +67,30 @@ mesh.init(0,1)
 
 # Define functions
 a1 = Function(V)
+a11 = Function(V)
 a2 = Function(V)
-t = Function(Vt)
-t1 = Function(Vt)
+a21 = Function(V)
+t = Function(V)
+t1 = Function(V)
 u = Function(V)
+u1 = Function(V)
 a1_up = Function(V)
+a11_up = Function(V)
 a2_up = Function(V)
-t_up = Function(Vt)
-t1_up = Function(Vt)
+a21_up = Function(V)
+t_up = Function(V)
+t1_up = Function(V)
 u_up = Function(V)
+u1_up = Function(V)
 #Temp functions to store the frechet derivatives
 temp_a1 = Function(V)
+temp_a11 = Function(V)
 temp_a2 = Function(V)
-temp_t = Function(Vt)
-temp_t1 = Function(Vt)
+temp_a21 = Function(V)
+temp_t = Function(V)
+temp_t1 = Function(V)
 temp_u = Function(V)
+temp_u1 = Function(V)
 
 def curl(a1,a2):
     return a2.dx(0) - a1.dx(1)
@@ -91,12 +101,15 @@ Pi = ( (1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u)) + ( (a1-t.dx(0))**2 
 Pi1 = ( (1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u)) + ( (a1-t1.dx(0))**2 + (a2-t1.dx(1))**2 )*u**2 \
       + inner( curl(a1 ,a2-Ae), curl(a1 ,a2-Ae) ) )*dx
 
-#Defining the gradient
+#Defining the gradients for each branch of the Riemann manifold.
 Fa1 = derivative(Pi, a1)
+Fa11 = derivative(Pi1, a1)
 Fa2 = derivative(Pi, a2)
+Fa21 = derivative(Pi1, a2)
 Ft = derivative(Pi, t)
 Ft1 = derivative(Pi1, t1)
 Fu = derivative(Pi, u)
+Fu1 = derivative(Pi1, u)
 
 
 ##Setting up the initial conditions
@@ -124,11 +137,11 @@ if read_in == 0: # We want to use the standard values.
                               *x[0]/sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))*1/K', \
                                 lx=lx, ly=ly, r=0.3517, K=kappa, degree=pord), V)
 # T = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
-#                             : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=pord), Vt)
+#                             : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=pord), V)
 # T1 = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
-#                             : -0.5*pie+atan2(x[1]-0.5*ly,-x[0]+0.5*lx)',pie=np.pi, lx=lx, ly=ly, r=0.001, degree=pord), Vt) # 0.5*np.pi+
- T = interpolate( Expression('atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=pord), Vt)
- T1 = interpolate( Expression('-0.5*pie+atan2(x[1]-0.5*ly,-x[0]+0.5*lx)',pie=np.pi, lx=lx, ly=ly, r=0.001, degree=pord), Vt) # 0.5*np.pi+
+#                             : pie+atan2(x[1]-0.5*ly,-x[0]+0.5*lx)',pie=np.pi, lx=lx, ly=ly, r=0.001, degree=pord), V) # 0.5*np.pi+
+ T = interpolate( Expression('atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=pord), V)
+ T1 = interpolate( Expression('atan2(-x[0]+0.5*lx,-x[1]+0.5*ly)', lx=lx, ly=ly, r=0.001, degree=pord), V) # 0.5*np.pi+
  U = interpolate( Expression('tanh(sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)))', lx=lx, ly=ly, degree=pord), V) 
 ###---------------------------------------------------------------------------------------------------------------
 elif read_in == 1: # We want to read from xdmf files
@@ -160,7 +173,6 @@ u_up.vector()[:] = U.vector()[:]
 
 #Plot mesh
 plot(mesh)
-#plot(T.vector())
 plt.show()
 
 coordinates = mesh.coordinates()
@@ -177,34 +189,35 @@ if pord == 1:
  strt = int(np.ceil(0.5*Nx))
  stp = int(Nx+1)
  nd = strt + int(np.ceil(0.5*Ny+0.5))*stp
- print("v2d of disc",v2d[strt:nd:stp])
- print("v of disc",np.arange(strt,nd,stp))
- print("v of disc start stop",range(strt,nd,stp))
  #Marker_array[v2d[strt:nd:stp]]=0
  Marker_array[v2d[strt:nd:stp]]=0
  #Marker_array[v2d[2:2+2*4:4]] = 0
  vertex_values = u.compute_vertex_values()
  xcoord = mesh.coordinates()
- print("coord of disc",xcoord[strt:nd:stp])
+ vertex_coord = np.arange(strt,nd,stp)
+ disc_coord = xcoord[vertex_coord]
+ print("v2d of disc",v2d[vertex_coord])
+ print("vertex no. of disc",vertex_coord)
+ print("v of disc start stop",range(strt,nd,stp))
+ print("coord of disc",disc_coord)
  print("----------------------------------------------------------------------------------------")
 else:
  sys.exit("havent implemnted pord > 1")
- ##For 2D
- print(V.tabulate_dof_coordinates()) # this array doesnt display
- print(V.dofmap().entity_dofs(mesh,0)) # this is the list of vertices of elements
- print(V.dofmap().entity_dofs(mesh, 1)) # list of all the corner nodes of elements.
- element = V.element()
- dofmap = V.dofmap()
- for cell in cells(mesh):
-     for i in element.tabulate_dof_coordinates(cell):
-         if i[0] == 0.5*lx and i[1] <= 0.5*ly:
-             Marker_array[cell.index()] = 0
-             print(i[0],i[1],np.where(element.tabulate_dof_coordinates(cell)==i)[0])  # [element.tabulate_dof_coordinates(cell)]
-             print(element.tabulate_dof_coordinates(cell))
-             print(dofmap.cell_dofs(cell.index()))
+ ###For 2D
+ #print(V.tabulate_dof_coordinates()) # this array doesnt display
+ #print(V.dofmap().entity_dofs(mesh,0)) # this is the list of vertices of elements
+ #print(V.dofmap().entity_dofs(mesh, 1)) # list of all the corner nodes of elements.
+ #element = V.element()
+ #dofmap = V.dofmap()
+ #for cell in cells(mesh):
+ #    for i in element.tabulate_dof_coordinates(cell):
+ #        if i[0] == 0.5*lx and i[1] <= 0.5*ly:
+ #            Marker_array[cell.index()] = 0
+ #            print(i[0],i[1],np.where(element.tabulate_dof_coordinates(cell)==i)[0])  # [element.tabulate_dof_coordinates(cell)]
+ #            print(element.tabulate_dof_coordinates(cell))
+ #            print(dofmap.cell_dofs(cell.index()))
 
 Marker.vector()[:] = Marker_array
-
 
 n = V.dim()                                                                      
 d = mesh.geometry().dim()                                                        
@@ -213,6 +226,14 @@ dof_coordinates.resize((n, d))
 dof_x = dof_coordinates[:, 0]                                                    
 dof_y = dof_coordinates[:, 1]                                                    
 disc_T = interpolate( T, V)
+
+###Plotting the functions around the discontinuity to check 
+#print("Testing for the discontinuity in the variables.")
+#for i in vertex_coord:
+# print("T(",i,")-T(",i-1,") = ",T.vector()[v2d[i]]-T.vector()[v2d[i-1]],"   T1(",i,")-T1(",i-1,") = ",T1.vector()[v2d[i]]-T1.vector()[v2d[i-1]],"   U(",i,")-U(",i-1,") = ",U.vector()[v2d[i]]-U.vector()[v2d[i-1]],"   A1(",i,")-A1(",i-1,") = ",A1.vector()[v2d[i]]-A1.vector()[v2d[i-1]],"   A2(",i,")-A2(",i-1,") = ",A2.vector()[v2d[i]]-A2.vector()[v2d[i-1]])
+# print("T(",i,")-T(",i+1,") = ",T.vector()[v2d[i]]-T.vector()[v2d[i+1]],"   T1(",i,")-T1(",i+1,") = ",T1.vector()[v2d[i]]-T1.vector()[v2d[i+1]],"   U(",i,")-U(",i+1,") = ",U.vector()[v2d[i]]-U.vector()[v2d[i+1]],"   A1(",i,")-A1(",i+1,") = ",A1.vector()[v2d[i]]-A1.vector()[v2d[i+1]],"   A2(",i,")-A2(",i+1,") = ",A2.vector()[v2d[i]]-A2.vector()[v2d[i+1]])
+
+## Scatter plot to map discontinuity.
 fig = plt.figure()                                                               
 ax = fig.add_subplot(111, projection='3d')                                       
 ax.scatter(dof_x, dof_y, disc_T.vector()[:], c='b', marker='.')                  
@@ -222,36 +243,111 @@ plt.show()
 
 for tt in range(NN):
  a1.vector()[:] = a1_up.vector()[:]
+ a11.vector()[:] = a11_up.vector()[:]
  a2.vector()[:] = a2_up.vector()[:]
+ a21.vector()[:] = a21_up.vector()[:]
  t.vector()[:] = t_up.vector()[:] 
  t1.vector()[:] = t1_up.vector()[:] 
- #if any(t.vector()[:] < 0) or any(t.vector()[:] > 2*np.pi):
- # print("============================================================")
- # print("before modding the previous output")
- # print(t_up.vector()[:])
- # print("============================================================")
- # print("after modding the previous output")
- # print(t.vector()[:])
+ if any(t.vector()[:] < -np.pi) or any(t.vector()[:] > np.pi):
+  print("============================================================")
+  print("before modding the previous output")
+  print(t_up.vector()[:])
+  print("============================================================")
+  print("after modding the previous output")
+  print(t.vector()[:])
  u.vector()[:] = u_up.vector()[:]
+ u1.vector()[:] = u1_up.vector()[:]
  Fa1_vec = assemble(Fa1)
+ Fa11_vec = assemble(Fa11)
  Fa2_vec = assemble(Fa2)
+ Fa21_vec = assemble(Fa21)
  Ft_vec = assemble(Ft)
  Ft1_vec = assemble(Ft1)
  Fu_vec = assemble(Fu)
- 
- #modifying F_t
- #for v in vertices(mesh):
- #   #print("in the vertex loop")
- #   idx = v.index()
- #   neighborhood = [Edge(mesh, i).entities(0) for i in v.entities(1)]
- #   neighborhood = np.array(neighborhood).flatten()
+ Fu1_vec = assemble(Fu1)
 
- #   # Remove own index from neighborhood
- #   neighborhood = neighborhood[np.where(neighborhood != idx)[0]]
- #   for ii in neighborhood:
- #    if np.absolute(t.vector()[ii] - t.vector()[idx]) >= 2*np.pi-0.001 :
- #     print("t(",ii,")=",t.vector()[ii],"and t(",idx,")=",t.vector()[idx])
- #    
+ ###Plotting the Reiz representation of the Freschet derivatives.
+ ### based on tests here, it seems best to replace i-1, i and i+1 with the their corresponding branch 1 values.
+ #store_t = np.zeros(7)
+ #store_u = np.zeros(7)
+ #store_a1 = np.zeros(7)
+ #store_a2 = np.zeros(7)
+ #for i in vertex_coord:
+ # store_t[0] = store_t[0] + np.absolute(Ft_vec[v2d[i-3]] - Ft1_vec[v2d[i-3]])
+ # store_t[1] = store_t[1] + np.absolute(Ft_vec[v2d[i-2]] - Ft1_vec[v2d[i-2]])
+ # store_t[2] = store_t[2] + np.absolute(Ft_vec[v2d[i-1]] - Ft1_vec[v2d[i-1]])
+ # store_t[3] = store_t[3] + np.absolute(Ft_vec[v2d[i-0]] - Ft1_vec[v2d[i-0]])
+ # store_t[4] = store_t[4] + np.absolute(Ft_vec[v2d[i+1]] - Ft1_vec[v2d[i+1]])
+ # store_t[5] = store_t[5] + np.absolute(Ft_vec[v2d[i+2]] - Ft1_vec[v2d[i+2]])
+ # store_t[6] = store_t[6] + np.absolute(Ft_vec[v2d[i+3]] - Ft1_vec[v2d[i+3]])
+
+ # store_u[0] = store_u[0] + np.absolute(Fu_vec[v2d[i-3]] - Fu1_vec[v2d[i-3]])
+ # store_u[1] = store_u[1] + np.absolute(Fu_vec[v2d[i-2]] - Fu1_vec[v2d[i-2]])
+ # store_u[2] = store_u[2] + np.absolute(Fu_vec[v2d[i-1]] - Fu1_vec[v2d[i-1]])
+ # store_u[3] = store_u[3] + np.absolute(Fu_vec[v2d[i-0]] - Fu1_vec[v2d[i-0]])
+ # store_u[4] = store_u[4] + np.absolute(Fu_vec[v2d[i+1]] - Fu1_vec[v2d[i+1]])
+ # store_u[5] = store_u[5] + np.absolute(Fu_vec[v2d[i+2]] - Fu1_vec[v2d[i+2]])
+ # store_u[6] = store_u[6] + np.absolute(Fu_vec[v2d[i+3]] - Fu1_vec[v2d[i+3]])
+
+ # store_a1[0] = store_a1[0] + np.absolute(Fa1_vec[v2d[i-3]] - Fa11_vec[v2d[i-3]])
+ # store_a1[1] = store_a1[1] + np.absolute(Fa1_vec[v2d[i-2]] - Fa11_vec[v2d[i-2]])
+ # store_a1[2] = store_a1[2] + np.absolute(Fa1_vec[v2d[i-1]] - Fa11_vec[v2d[i-1]])
+ # store_a1[3] = store_a1[3] + np.absolute(Fa1_vec[v2d[i-0]] - Fa11_vec[v2d[i-0]])
+ # store_a1[4] = store_a1[4] + np.absolute(Fa1_vec[v2d[i+1]] - Fa11_vec[v2d[i+1]])
+ # store_a1[5] = store_a1[5] + np.absolute(Fa1_vec[v2d[i+2]] - Fa11_vec[v2d[i+2]])
+ # store_a1[6] = store_a1[6] + np.absolute(Fa1_vec[v2d[i+3]] - Fa11_vec[v2d[i+3]])
+
+ # store_a2[0] = store_a2[0] + np.absolute(Fa2_vec[v2d[i-3]] - Fa21_vec[v2d[i-3]])
+ # store_a2[1] = store_a2[1] + np.absolute(Fa2_vec[v2d[i-2]] - Fa21_vec[v2d[i-2]])
+ # store_a2[2] = store_a2[2] + np.absolute(Fa2_vec[v2d[i-1]] - Fa21_vec[v2d[i-1]])
+ # store_a2[3] = store_a2[3] + np.absolute(Fa2_vec[v2d[i-0]] - Fa21_vec[v2d[i-0]])
+ # store_a2[4] = store_a2[4] + np.absolute(Fa2_vec[v2d[i+1]] - Fa21_vec[v2d[i+1]])
+ # store_a2[5] = store_a2[5] + np.absolute(Fa2_vec[v2d[i+2]] - Fa21_vec[v2d[i+2]])
+ # store_a2[6] = store_a2[6] + np.absolute(Fa2_vec[v2d[i+3]] - Fa21_vec[v2d[i+3]])
+
+ #print("iteration = ", tt)
+ #print("------------------------------------------------------------------------") 
+ #print("sum||Ft_vec-Ft1_vec|_cdot-3||= ", store_t[0]) 
+ #print("sum||Ft_vec-Ft1_vec|_cdot-2||= ", store_t[1]) 
+ #print("sum||Ft_vec-Ft1_vec|_cdot-1||= ", store_t[2]) 
+ #print("sum||Ft_vec-Ft1_vec|_cdot-0||= ", store_t[3]) 
+ #print("sum||Ft_vec-Ft1_vec|_cdot+1||= ", store_t[4]) 
+ #print("sum||Ft_vec-Ft1_vec|_cdot+2||= ", store_t[5]) 
+ #print("sum||Ft_vec-Ft1_vec|_cdot+3||= ", store_t[6]) 
+ #print("------------------------------------------------------------------------") 
+ #print("sum||Fu_vec-Fu1_vec|_cdot-3||= ", store_u[0]) 
+ #print("sum||Fu_vec-Fu1_vec|_cdot-2||= ", store_u[1]) 
+ #print("sum||Fu_vec-Fu1_vec|_cdot-1||= ", store_u[2]) 
+ #print("sum||Fu_vec-Fu1_vec|_cdot-0||= ", store_u[3]) 
+ #print("sum||Fu_vec-Fu1_vec|_cdot+1||= ", store_u[4]) 
+ #print("sum||Fu_vec-Fu1_vec|_cdot+2||= ", store_u[5]) 
+ #print("sum||Fu_vec-Fu1_vec|_cdot+3||= ", store_u[6]) 
+ #print("------------------------------------------------------------------------") 
+ #print("sum||Fa1_vec-Fa11_vec|_cdot-3||= ", store_a1[0]) 
+ #print("sum||Fa1_vec-Fa11_vec|_cdot-2||= ", store_a1[1]) 
+ #print("sum||Fa1_vec-Fa11_vec|_cdot-1||= ", store_a1[2]) 
+ #print("sum||Fa1_vec-Fa11_vec|_cdot-0||= ", store_a1[3]) 
+ #print("sum||Fa1_vec-Fa11_vec|_cdot+1||= ", store_a1[4]) 
+ #print("sum||Fa1_vec-Fa11_vec|_cdot+2||= ", store_a1[5]) 
+ #print("sum||Fa1_vec-Fa11_vec|_cdot+3||= ", store_a1[6]) 
+ #print("------------------------------------------------------------------------") 
+ #print("sum||Fa2_vec-Fa21_vec|_cdot-3||= ", store_a2[0]) 
+ #print("sum||Fa2_vec-Fa21_vec|_cdot-2||= ", store_a2[1]) 
+ #print("sum||Fa2_vec-Fa21_vec|_cdot-1||= ", store_a2[2]) 
+ #print("sum||Fa2_vec-Fa21_vec|_cdot-0||= ", store_a2[3]) 
+ #print("sum||Fa2_vec-Fa21_vec|_cdot+1||= ", store_a2[4]) 
+ #print("sum||Fa2_vec-Fa21_vec|_cdot+2||= ", store_a2[5]) 
+ #print("sum||Fa2_vec-Fa21_vec|_cdot+3||= ", store_a2[6]) 
+ #print("------------------------------------------------------------------------") 
+  
+
+ ##modifying F_t
+ for i in vertex_coord:
+  Fa1_vec[v2d[i-1:i+1:1]] = Fa11_vec[v2d[i-1:i+1:1]]
+  Fa2_vec[v2d[i-1:i+1:1]] = Fa21_vec[v2d[i-1:i+1:1]]
+  Fu_vec[v2d[i-1:i+1:1]] = Fu1_vec[v2d[i-1:i+1:1]]
+  Ft_vec[v2d[i-1:i+1:1]] = Ft1_vec[v2d[i-1:i+1:1]]
+    
 
  a1_up.vector()[:] = a1.vector()[:] - gamma*Fa1_vec[:]
  a2_up.vector()[:] = a2.vector()[:] - gamma*Fa2_vec[:]
@@ -264,26 +360,26 @@ for tt in range(NN):
  temp_t1.vector()[:] = Ft1_vec[:]
  temp_u.vector()[:] = Fu_vec[:]
  
- #c = plot(temp_u)
- #plt.title(r"$F_{u}(x)$",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
- #c = plot(temp_a1)
- #plt.title(r"$F_{a1}(x)$",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
- #c = plot(temp_a2)
- #plt.title(r"$F_{a2}(x)$",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
- #c = plot(temp_t)
- #plt.title(r"$F_{\theta}$(x)",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
- #c = plot(temp_t1)
- #plt.title(r"$F_{\theta1}$(x)",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
+ c = plot(temp_t)
+ plt.title(r"$F_{\theta}$(x)",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_t1)
+ plt.title(r"$F_{\theta1}$(x)",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_u)
+ plt.title(r"$F_{u}(x)$",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_a1)
+ plt.title(r"$F_{a1}(x)$",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_a2)
+ plt.title(r"$F_{a2}(x)$",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
 
  #print(Fa1_vec.get_local()) # prints the vector.
  #print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
@@ -291,7 +387,7 @@ for tt in range(NN):
            +np.linalg.norm(np.asarray(Fa2_vec.get_local()))\
            +np.linalg.norm(np.asarray(Ft_vec.get_local()))\
            +np.linalg.norm(np.asarray(Fu_vec.get_local()))
- print(tol_test)
+ #print(tol_test)
  if float(tol_test)  < tol :
   break
  
@@ -337,19 +433,19 @@ print("Ny = ", Ny)
 #print("tol = ", tol, ", ", float(tol_test))
 #print("read_in = ", read_in)
 
-#c = plot(U)
-#plt.title(r"$U(x)$",fontsize=26)
-#plt.colorbar(c)
-#plt.show()
-#c = plot(T)
-#plt.title(r"$T(x)$",fontsize=26)
-#plt.colorbar(c)
-#plt.show()
-#c = plot(T1)
-#plt.title(r"$T1(x)$",fontsize=26)
-#plt.colorbar(c)
-#plt.show()
-#
+c = plot(U)
+plt.title(r"$U(x)$",fontsize=26)
+plt.colorbar(c)
+plt.show()
+c = plot(T)
+plt.title(r"$T(x)$",fontsize=26)
+plt.colorbar(c)
+plt.show()
+c = plot(T1)
+plt.title(r"$T1(x)$",fontsize=26)
+plt.colorbar(c)
+plt.show()
+
 #c = plot(u)
 #plt.title(r"$u(x)$",fontsize=26)
 #plt.colorbar(c)
