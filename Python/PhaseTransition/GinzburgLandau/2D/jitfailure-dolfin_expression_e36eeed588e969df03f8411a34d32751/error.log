@@ -1,0 +1,4 @@
+/var/folders/1g/ph21gtcx2bbd4j5d7qk2tnc00000gn/T/tmpgbdwadzd/dolfin_expression_e36eeed588e969df03f8411a34d32751.cpp:61:25: error: use of undeclared identifier 'np'
+          values[0] = 3*np.pi;
+                        ^
+1 error generated.
