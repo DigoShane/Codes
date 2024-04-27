@@ -51,6 +51,17 @@ read_in = int(0)
 #Nx = max(np.ceil(lx*10/kappa),Nx)
 #Ny = max(np.ceil(ly*10/kappa),Ny)
 mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), Nx, Ny) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+
+#Refining the mesh near the centre.
+# Mark cells for refinement
+cell_markers = MeshFunction("bool", mesh, mesh.topology().dim()) # 1st arg is i/p type, 2nd is mesh, 3rd is dimension.
+for c in cells(mesh):
+    if c.midpoint().distance(Point(0.5*lx,0.5*ly)) < 0.1: # checking if the midpoint of the cell is close to the point p
+        cell_markers[c] = True
+    else:
+        cell_markers[c] = False
+mesh = refine(mesh, cell_markers)
+
 x = SpatialCoordinate(mesh)
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
 V = FunctionSpace(mesh, "Lagrange", pord)#This is for ExtFile
