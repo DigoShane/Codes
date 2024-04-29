@@ -2,12 +2,14 @@
 #To do 3D plots I use paraview and another method.
 #The other method is to extract the data and interpolate it using numpy or scipy and then plot it.
 # Spoiler alter, the last method doesnt work very well. 
-#After tinkering for about half a day, I just decided to go with paraview.
 #---------------------------------------------------------------------------------------------------------
 # Solving the heat equation in 2D with T(x_1=0)=T(x_1=1)=0.
 #There is a heat source f at (0.5,0.5) with flux boundary conditions (g) at x_2=0 and x_2=1.
-#=========================================================================================================
+#---------------------------------------------------------------------------------------------------------
 #This is written specificaly for rectangular domains in mind.
+#=========================================================================================================
+#NOTE
+#After tinkering for about half a day, I just decided to go with paraview.
 
 import dolfin
 print(f"DOLFIN version: {dolfin.__version__}")
