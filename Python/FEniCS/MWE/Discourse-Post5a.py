@@ -47,16 +47,12 @@ a1 = Function(V)
 a2 = Function(V)
 t = Function(V)
 t1 = Function(V)
-u = Function(V)
-u1 = Function(V)
 a1_up = Function(V)
 a11_up = Function(V)
 a2_up = Function(V)
 a21_up = Function(V)
 t_up = Function(V)
 t1_up = Function(V)
-u_up = Function(V)
-u1_up = Function(V)
 #Temp functions to store the frechet derivatives
 temp_a1 = Function(V)
 temp_a11 = Function(V)
@@ -64,8 +60,6 @@ temp_a2 = Function(V)
 temp_a21 = Function(V)
 temp_t = Function(V)
 temp_t1 = Function(V)
-temp_u = Function(V)
-temp_u1 = Function(V)
 
 def curl(a1,a2):
     return a2.dx(0) - a1.dx(1)
@@ -83,63 +77,24 @@ Fa2 = derivative(Pi, a2)
 Fa21 = derivative(Pi1, a2)
 Ft = derivative(Pi, t)
 Ft1 = derivative(Pi1, t1)
-Fu = derivative(Pi, u)
-Fu1 = derivative(Pi1, u)
 
 
 ##Setting up the initial conditions
-if read_in == 0: # We want to use the standard values.
- ##SC state
- #print("Using bulk SC as initial condition")
- #A1 = interpolate( Expression("0.0", degree=pord), V)
- #A2 = interpolate( Expression("0.0", degree=pord), V)
- #T = interpolate( Expression("1.0", degree=pord), V)
- #U = interpolate( Expression("1.0", degree=pord), V)
- ##Modified normal state
- #print("Using modified bulk Normal as initial condition")
- #A1 = interpolate( Expression("0.0", degree=pord), V)
- #A2 = interpolate( Expression("H*x[0]", H=H, degree=pord), V)
- #T = interpolate( Expression("x[1]", degree=pord), V)
- #U = interpolate( Expression("x[0]", degree=pord), V)
- ##Vortex Solution.
- print("Using Vortex solution")
- A1 = interpolate( Expression('sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)) <= r + DOLFIN_EPS ? -x[1] : \
-                             -exp(-sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))) \
-                              *x[1]/sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))*1/K', \
-                                lx=lx, ly=ly, r=0.3517, K=kappa, degree=pord), V)
- A2 = interpolate( Expression('sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)) <= r + DOLFIN_EPS ? x[0] : \
-                             exp(-sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))) \
-                              *x[0]/sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))*1/K', \
-                                lx=lx, ly=ly, r=0.3517, K=kappa, degree=pord), V)
-# T = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
-#                             : atan2(x[0]-0.5*lx,x[1]-0.5*ly)', lx=lx, ly=ly, r=0.001, degree=pord), V)
-# T1 = interpolate( Expression('(x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly) <= r*r + DOLFIN_EPS ? 1 \
-#                             : pie+atan2(x[1]-0.5*ly,-x[0]+0.5*lx)',pie=np.pi, lx=lx, ly=ly, r=0.001, degree=pord), V) # 0.5*np.pi+
-#### !!xDx!! atan2(f1,f2) = atan(f1/f2)
- T = interpolate( Expression('atan2(-x[1]+0.5*ly,-x[0]+0.5*lx)+pie',pie=np.pi, lx=lx, ly=ly, degree=pord), V)
- T1 = interpolate( Expression('atan2(x[1]-0.5*lx,x[0]-0.5*ly)+2*pie',pie=np.pi, lx=lx, ly=ly, degree=pord), V) 
- U = interpolate( Expression('tanh(sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)))', lx=lx, ly=ly, degree=pord), V) 
+##Vortex Solution.
+print("Using Vortex solution")
+A1 = interpolate( Expression('sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)) <= r + DOLFIN_EPS ? -x[1] : \
+                            -exp(-sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))) \
+                             *x[1]/sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))*1/K', \
+                               lx=lx, ly=ly, r=0.3517, K=kappa, degree=pord), V)
+A2 = interpolate( Expression('sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)) <= r + DOLFIN_EPS ? x[0] : \
+                            exp(-sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))) \
+                             *x[0]/sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly))*1/K', \
+                               lx=lx, ly=ly, r=0.3517, K=kappa, degree=pord), V)
+### !!xDx!! atan2(f1,f2) = atan(f1/f2)
+T = interpolate( Expression('atan2(-x[1]+0.5*ly,-x[0]+0.5*lx)+pie',pie=np.pi, lx=lx, ly=ly, degree=pord), V)
+T1 = interpolate( Expression('atan2(x[1]-0.5*lx,x[0]-0.5*ly)+2*pie',pie=np.pi, lx=lx, ly=ly, degree=pord), V) 
+U = interpolate( Expression('tanh(sqrt((x[0]-0.5*lx)*(x[0]-0.5*lx)+(x[1]-0.5*ly)*(x[1]-0.5*ly)))', lx=lx, ly=ly, degree=pord), V) 
 ###---------------------------------------------------------------------------------------------------------------
-elif read_in == 1: # We want to read from xdmf files
- #Reading input from a .xdmf file.
- print("reading in previous output as initial condition.")
- A1 = Function(V)
- A2 = Function(V)
- T = Function(V)
- U = Function(V)
- a1_in =  XDMFFile("GL-2DEnrg-0.xdmf")
- a1_in.read_checkpoint(A1,"a1",0)
- a2_in =  XDMFFile("GL-2DEnrg-1.xdmf")
- a2_in.read_checkpoint(A2,"a2",0)
- t_in =  XDMFFile("GL-2DEnrg-2.xdmf")
- t_in.read_checkpoint(T,"t",0)
- u_in =  XDMFFile("GL-2DEnrg-3.xdmf")
- u_in.read_checkpoint(U,"u",0)
- #plot(u)
- #plt.title(r"$u(x)-b4$",fontsize=26)
- #plt.show()
-else:
- sys.exit("Not a valid input for read_in.")
 
 a1_up.vector()[:] = A1.vector()[:]
 a2_up.vector()[:] = A2.vector()[:]
@@ -225,13 +180,7 @@ for tt in range(NN):
  a21.vector()[:] = a21_up.vector()[:]
  t.vector()[:] = t_up.vector()[:] 
  t1.vector()[:] = t1_up.vector()[:] 
- if any(t.vector()[:] < 0) or any(t.vector()[:] > 2*np.pi):
-  print("============================================================")
-  print("before modding the previous output")
-  print(t_up.vector()[:])
-  print("============================================================")
-  print("after modding the previous output")
-  print(t.vector()[:])
+ ## Modify the line of discontinuity ot matchwhere the 0/2\pi solution is. 
  u.vector()[:] = u_up.vector()[:]
  u1.vector()[:] = u1_up.vector()[:]
  Fa1_vec = assemble(Fa1)

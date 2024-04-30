@@ -14,6 +14,7 @@
 #IMP. Get \theta_1 from rotating and shifting \theta.
 #======================================================================================================
 #ISSUES WITH THE CODE:-
+#\theta1 is coming out a bit weird. The top right hand corner does not seem to be correct.
 
 import time # timing for performance test.
 t0 = time.time()
@@ -311,13 +312,15 @@ for tt in range(NN):
  t1.vector()[:] = t1_up.vector()[:] 
  for idx in range(len(t.vector()[:])) :
   if t.vector()[idx] < 0-DOLFIN_EPS or t.vector()[idx] > 2*np.pi+DOLFIN_EPS:
-   print("t(",idx,") = ",t.vector()[idx])
+   #print("t(",idx,") = ",t.vector()[idx])
    if idx in v2d[vertex_coord] :
     t_array = t.vector()[:]
     t_array[idx] = 2*np.pi
     t.vector()[:] = t_array
    else:
     print("err--t(",idx,") = ",t.vector()[idx])
+    print("blw--t(",idx-1-Nx,") = ",t.vector()[idx-1-Nx])
+    print("top--t(",idx+1+Nx,") = ",t.vector()[idx+1+Nx])
  #if any(t.vector()[:] < 0-DOLFIN_EPS) or any(t.vector()[:] > 2*np.pi+DOLFIN_EPS):
  # print("============================================================")
  # print("before modding the previous output")
@@ -450,26 +453,26 @@ for tt in range(NN):
  temp_t1.vector()[:] = t1_up.vector()[:]
  temp_u.vector()[:] =  u_up.vector()[:]
 
- c = plot(temp_t)
- plt.title(r"theta$(x)",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_t1)
- plt.title(r"theta1$(x)",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_u)
- plt.title(r"u(x)$",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a1)
- plt.title(r"a1(x)$",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a2)
- plt.title(r"a2(x)$",fontsize=26)
- plt.colorbar(c)
- plt.show()
+ #c = plot(temp_t)
+ #plt.title(r"theta$(x)",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_t1)
+ #plt.title(r"theta1$(x)",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_u)
+ #plt.title(r"u(x)$",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_a1)
+ #plt.title(r"a1(x)$",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_a2)
+ #plt.title(r"a2(x)$",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
 
  #print(Fa1_vec.get_local()) # prints the vector.
  #print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
