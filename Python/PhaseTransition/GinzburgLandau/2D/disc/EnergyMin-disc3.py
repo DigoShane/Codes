@@ -1,20 +1,14 @@
-#Explicitly model disocntinuities.
+#Explicitly model disocntinuities, but we mesh near the core finer.
 #======================================================================================================
-#1. identify the nodes associated with the discontinuity.
-# "DONE"  a. Check where T is discontinuous,  
-#   b. Check to make sure that u, A and t for these variables develop a discontinuity.
-# "DONE" 2. print the values of the nodes and check which ones are closest to the discontinuity.  
-# "DONE" 3. Try to modify the values of the gradients at that point. 
-# "DONE"   print \nabla \theta  and see if you have a discontinuity there. 
-# "DONE" 4. Get N_x, N_y from kappa. Implenet the 2*np.ceil((1+N)/2)
-#5. Properly modify theta, theta1 such that it is bounded within the appropriate range. 
-#6. Plug in the closed form solution near the origin. Maybe use two domains. with different meshing.
-#IMP. plot the discontinuity for \theta
-#IMP. Make sure that its along x1>0, x2=0.
-#IMP. Get \theta_1 from rotating and shifting \theta.
+#1. Refine the mesh.
+#2. read in the value of Theta from the last computation (input if its first iteration).
+#3. Determine \theta1 from \theta.
+#4. identify the discontinuity line from the read in value of theta and theta1. 
+#5. Modify the solution of Ft, Fu, Fa1 and Fa2. 
+#6. Determine \theta1 from \theta.
+#6. When storing the output in an xdmf file, make sure to store theta_1 as well.
 #======================================================================================================
 #ISSUES WITH THE CODE:-
-#\theta1 is coming out a bit weird. The top right hand corner does not seem to be correct.
 
 import time # timing for performance test.
 t0 = time.time()
@@ -32,33 +26,58 @@ import matplotlib.pyplot as plt
 import sys
 np.set_printoptions(threshold=sys.maxsize)
 
-#Parameters
+## Defining the Parameters
 print("================input to code========================")
 pord = int(1)# degree of polynmomials used for FEA
 kappa = Constant(2.0)
 lx = float(input("lx? --> "))
 ly = float(input("ly? --> "))
-print("choosing kappa or Nx, Ny even helps the calculations.")
+print("Code replaces odd no. with next highest even no.")
 Nx = int(input("Nx? --> "))
 Ny = int(input("Ny? --> "))
+Nx = int(2*np.ceil(Nx/2))
+Ny = int(2*np.ceil(Ny/2))
 gamma = float(0.01) # Learning rate.
 NN = int(input('Number of iterations? -->')) # Number of iterations
 H = Constant(0.23);
 tol = float(0.000001)
-read_in = int(input('0 is for stored initial guess, 1 is for last output -->'))
+read_in = int(0)
+c_r = float(0.1)
+Ref_No = int(input("Refinement number? -->"))
 
 
 #Create mesh and define function space
-Nx = int(2*np.ceil(0.5*max(np.ceil(lx*10/kappa),Nx)))
-Ny = int(2*np.ceil(0.5*max(np.ceil(ly*10/kappa),Ny)))
-print("Nx, Ny",Nx,Ny)
+#Nx = max(np.ceil(lx*10/kappa),Nx)
+#Ny = max(np.ceil(ly*10/kappa),Ny)
 mesh = RectangleMesh(Point(0., 0.), Point(lx, ly), Nx, Ny) # "crossed means that first it will partition the ddomain into Nx x Ny rectangles. Then each rectangle is divided into 4 triangles forming a cross"
+
+
+plot(mesh)
+plt.show()
+
+##Refining the mesh near the centre.=================================================================================
+#!!xDx!! To refine the mesh further, we need to run the following section of code multiple times. USe for loop.
+
+for i in range(Ref_No):
+ # Mark cells for refinement
+ cell_markers = MeshFunction("bool", mesh, mesh.topology().dim()) # 1st arg is i/p type, 2nd is mesh, 3rd is dimension.
+ for c in cells(mesh):
+     if c.midpoint().distance(Point(0.5*lx,0.5*ly)) < c_r: # checking if the midpoint of the cell is close to the point p
+         cell_markers[c] = True
+     else:
+         cell_markers[c] = False
+ mesh = refine(mesh, cell_markers)
+ plot(mesh)
+ plt.show()
+##====================================================================================================================
+
 x = SpatialCoordinate(mesh)
 Ae = H*x[0] #The vec pot is A(x) = Hx_1e_2
 V = FunctionSpace(mesh, "Lagrange", pord)#This is for ExtFile
 
 mesh.init(0,1)
 
+#========================================================================================================================
 # Define functions
 a1 = Function(V)
 a11 = Function(V)
@@ -104,8 +123,10 @@ Ft = derivative(Pi, t)
 Ft1 = derivative(Pi1, t1)
 Fu = derivative(Pi, u)
 Fu1 = derivative(Pi1, u)
+#========================================================================================================================
 
 
+#========================================================================================================================
 ##Setting up the initial conditions
 if read_in == 0: # We want to use the standard values.
  ##SC state
@@ -159,6 +180,7 @@ elif read_in == 1: # We want to read from xdmf files
  #plt.show()
 else:
  sys.exit("Not a valid input for read_in.")
+#========================================================================================================================
 
 a1_up.vector()[:] = A1.vector()[:]
 a2_up.vector()[:] = A2.vector()[:]
@@ -170,53 +192,30 @@ u_up.vector()[:] = U.vector()[:]
 plot(mesh)
 plt.show()
 
+#========================================================================================================================
 #Creating a vector to mark the discontinuity.
 Marker = interpolate( Expression('0', degree=pord), V)
 Marker1 = interpolate( Expression('3*pie', pie=np.pi, degree=pord), V)
 
 Marker_array = Marker.vector()[:]
 Marker_array1 = Marker1.vector()[:]
-if pord == 1:
- ##For 1D
- v2d = vertex_to_dof_map(V) # This only works for 1D elements since vertices and nodes are the same.
- print("----------------------------------------------------------------------------------------")
- strt1 = int(np.ceil(0.5*Ny)*(1+Nx))
- strt = int(np.ceil(0.5*Nx)+np.ceil(0.5*Ny)*(1+Nx))
- stp = int(1)
- nd = int( Nx+1 + np.ceil(0.5*Ny)*(1+Nx))
- Marker_array[v2d[strt:nd:stp]]=np.pi
- Marker_array1[v2d[strt1:strt:stp]]=np.pi
- vertex_values = u.compute_vertex_values()
- xcoord = mesh.coordinates()
- vertex_coord = np.arange(strt,nd,stp)
- vertex_coord1 = np.arange(strt1,strt,stp)
- disc_coord = xcoord[vertex_coord]
- disc_coord1 = xcoord[vertex_coord1]
- print("v2d of disc",v2d[vertex_coord])
- print("vertex no. of disc",vertex_coord)
- print("v of disc start stop",range(strt,nd,stp))
- print("coord of disc",disc_coord)
- print("v2d of disc1",v2d[vertex_coord1])
- print("vertex no. of disc1",vertex_coord1)
- print("v of disc1 start stop",range(strt1,strt,stp))
- print("coord of disc",disc_coord)
- print("coord of disc1",disc_coord1)
- print("----------------------------------------------------------------------------------------")
-else:
- sys.exit("havent implemnted pord > 1")
- ###For 2D
- #print(V.tabulate_dof_coordinates()) # this array doesnt display
- #print(V.dofmap().entity_dofs(mesh,0)) # this is the list of vertices of elements
- #print(V.dofmap().entity_dofs(mesh, 1)) # list of all the corner nodes of elements.
- #element = V.element()
- #dofmap = V.dofmap()
- #for cell in cells(mesh):
- #    for i in element.tabulate_dof_coordinates(cell):
- #        if i[0] == 0.5*lx and i[1] <= 0.5*ly:
- #            Marker_array[cell.index()] = 0
- #            print(i[0],i[1],np.where(element.tabulate_dof_coordinates(cell)==i)[0])  # [element.tabulate_dof_coordinates(cell)]
- #            print(element.tabulate_dof_coordinates(cell))
- #            print(dofmap.cell_dofs(cell.index()))
+xcoord = mesh.coordinates()
+v2d = vertex_to_dof_map(V)
+d2v = dof_to_vertex_map(V)
+disc_node = []
+disc_node1 = []
+
+for i,xx in enumerate(xcoord):
+ if xx[0] > 0.5*lx and xx[1] == 0.5*ly:
+  #print("on the discontinuity",xx)
+  #print("index no. is ",i)
+  Marker_array[v2d[i]] = np.pi 
+  disc_node.append(i)
+ if xx[0] < 0.5*lx and xx[1] == 0.5*ly:
+  #print("on the discontinuity1",xx)
+  #print("index1 no. is ",i)
+  Marker_array1[v2d[i]] = np.pi 
+  disc_node1.append(i)
 
 Marker.vector()[:] = Marker_array
 Marker1.vector()[:] = Marker_array1
@@ -230,76 +229,87 @@ dof_y = dof_coordinates[:, 1]
 disc_T = interpolate( T, V)
 disc_T1 = interpolate( T1, V)
 
-### Mapping to an Array form.
-#print("Printing T1")
-##Array1 = np.reshape(np.arange(0,(Nx+1)*(1+Ny)),(Nx+1,Ny+1))
-#Array1 = np.reshape(T1.vector()[v2d[np.arange(0,(Nx+1)*(1+Ny))]],(Ny+1,Nx+1))
-#Array1 = Array1[::-1]
-#for row in Array1:
-#    for item in row:
-#        print('{0:13.5f}'.format(item), end='\t')
-#    print('\n')
-#print("------------------------------------------------------------------------")
-#print("Printing T")
-##Array1 = np.reshape(np.arange(0,(Nx+1)*(1+Ny)),(Nx+1,Ny+1))
-#Array1 = np.reshape(T.vector()[v2d[np.arange(0,(Nx+1)*(1+Ny))]],(Ny+1,Nx+1))
-#Array1 = Array1[::-1]
-#for row in Array1:
-#    for item in row:
-#        print('{0:13.5f}'.format(item), end='\t')
-#    print('\n')
-#print("------------------------------------------------------------------------")
-#
-###Comparing the difference with the above
-#Array = np.zeros((Ny+1,Nx+1)) 
-#for i in np.arange(0,1+Nx):
-# for j in np.arange(0,1+Ny):
-#  Array[j][i] = np.pi+np.arctan2(-j*ly/Ny+0.5*ly,-i*lx/Nx+0.5*lx) 
-#Array = Array[::-1] 
-#Array1 = Array-Array1
-#for row in Array1:
-#    for item in row:
-#        print('{0:13.5f}'.format(item), end='\t')
-#    print('\n')
-#print("norm of difference",np.linalg.norm(Array1))
-#print("------------------------------------------------------------------------")
 
+
+## Scatter plot to map discontinuity.
+fig = plt.figure()                                                               
+ax = fig.add_subplot(111, projection='3d')                                       
+ax.scatter(dof_x, dof_y, disc_T.vector()[:], c='g', marker='.')                  
+ax.scatter(dof_x, dof_y, Marker.vector()[:], c='r', marker='.')                  
+#ax.scatter(dof_x, dof_y, Marker1.vector()[:], c='m', marker='.')                  
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()                                                                       
+
+## Scatter plot to map discontinuity.
+fig = plt.figure()                                                               
+ax = fig.add_subplot(111, projection='3d')                                       
+ax.scatter(dof_x, dof_y, disc_T1.vector()[:], c='b', marker='.')                  
+#ax.scatter(dof_x, dof_y, Marker.vector()[:], c='r', marker='.')                  
+ax.scatter(dof_x, dof_y, Marker1.vector()[:], c='m', marker='.')                  
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()                                                                       
+#========================================================================================================================
+
+
+
+
+#========================================================================================================================
+Marker_above = interpolate( Expression('0', degree=pord), V)
+Marker_below = interpolate( Expression('0', degree=pord), V)
+Marker_above_array = Marker_above.vector()[:]
+Marker_below_array = Marker_below.vector()[:]
+disc_above = []
+disc_below = []
 
 ##Plotting the functions around the discontinuity to check 
 print("Testing for the discontinuity in the variables.")
-for i in vertex_coord:
- print("T(",i,")-T(",i-1-Nx,") = ",T.vector()[v2d[i]]-T.vector()[v2d[i-1-Nx]],"   T1(",i,")-T1(",i-1-Nx,") = ",T1.vector()[v2d[i]]-T1.vector()[v2d[i-1-Nx]],"   U(",i,")-U(",i-1-Nx,") = ",U.vector()[v2d[i]]-U.vector()[v2d[i-1-Nx]],"   A1(",i,")-A1(",i-1-Nx,") = ",A1.vector()[v2d[i]]-A1.vector()[v2d[i-1-Nx]],"   A2(",i,")-A2(",i-1-Nx,") = ",A2.vector()[v2d[i]]-A2.vector()[v2d[i-1-Nx]])
- print("T(",i,")-T(",i+1+Nx,") = ",T.vector()[v2d[i]]-T.vector()[v2d[i+1+Nx]],"   T1(",i,")-T1(",i+1+Nx,") = ",T1.vector()[v2d[i]]-T1.vector()[v2d[i+1+Nx]],"   U(",i,")-U(",i+1+Nx,") = ",U.vector()[v2d[i]]-U.vector()[v2d[i+1+Nx]],"   A1(",i,")-A1(",i+1+Nx,") = ",A1.vector()[v2d[i]]-A1.vector()[v2d[i+1+Nx]],"   A2(",i,")-A2(",i+1+Nx,") = ",A2.vector()[v2d[i]]-A2.vector()[v2d[i+1+Nx]])
+#Need to identify the nodes nearest to the discontinuity.
+for i,xx in enumerate(xcoord):
+ for j,yy in enumerate(dof_coordinates):
+  if yy[1] > 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 > c_r**2 and abs(yy[1]-0.5*ly) <= ly/Ny: # disc nodes above x_2=0.5*ly and right of the core.
+   disc_above.append(j) 
+   Marker_above_array[j] = np.pi
+  elif yy[1] > 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 < c_r**2  and abs(yy[1]-0.5*ly) <= ly/Ny/2**(Ref_No)+DOLFIN_EPS: # discnodes above inside core
+   disc_above.append(j) 
+   Marker_above_array[j] = np.pi
+  elif yy[1] < 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 > c_r**2 and abs(yy[1]-0.5*ly) <= ly/Ny: # disc nodes below x_2=0.5*ly and right of the core.
+   disc_below.append(j) 
+   Marker_below_array[j] = np.pi
+  elif yy[1] < 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 < c_r**2 and abs(yy[1]-0.5*ly) <= ly/Ny/2**(Ref_No)+DOLFIN_EPS: # discnodes above&inside core
+   disc_below.append(j) 
+   Marker_below_array[j] = np.pi
+
+
+Marker_above.vector()[:] = Marker_above_array
+Marker_below.vector()[:] = Marker_below_array
+
+## Scatter plot to map nodes near
+fig = plt.figure()                                                               
+ax = fig.add_subplot(111, projection='3d')                                       
+ax.scatter(dof_x, dof_y, Marker.vector()[:], c='g', marker='.')                  
+ax.scatter(dof_x, dof_y, Marker_above.vector()[:], c='r', marker='.')                  
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()    
+
+## Scatter plot to map nodes near
+fig = plt.figure()                                                               
+ax = fig.add_subplot(111, projection='3d')                                       
+ax.scatter(dof_x, dof_y, Marker.vector()[:], c='g', marker='.')                  
+ax.scatter(dof_x, dof_y, Marker_below.vector()[:], c='m', marker='.')                  
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()    
+
 print("------------------------------------------------------------------------")
-print("Testing for the discontinuity1 in the variables.")
-for i in vertex_coord1:
- print("T1(",i,")-T1(",i-1-Nx,") = ",T1.vector()[v2d[i]]-T1.vector()[v2d[i-1-Nx]],"   T(",i,")-T(",i-1-Nx,") = ",T.vector()[v2d[i]]-T.vector()[v2d[i-1-Nx]],"   U(",i,")-U(",i-1-Nx,") = ",U.vector()[v2d[i]]-U.vector()[v2d[i-1-Nx]],"   A1(",i,")-A1(",i-1-Nx,") = ",A1.vector()[v2d[i]]-A1.vector()[v2d[i-1-Nx]],"   A2(",i,")-A2(",i-1-Nx,") = ",A2.vector()[v2d[i]]-A2.vector()[v2d[i-1-Nx]])
- print("T1(",i,")-T1(",i+1+Nx,") = ",T1.vector()[v2d[i]]-T1.vector()[v2d[i+1+Nx]],"   T(",i,")-T(",i+1+Nx,") = ",T.vector()[v2d[i]]-T.vector()[v2d[i+1+Nx]],"   U(",i,")-U(",i+1+Nx,") = ",U.vector()[v2d[i]]-U.vector()[v2d[i+1+Nx]],"   A1(",i,")-A1(",i+1+Nx,") = ",A1.vector()[v2d[i]]-A1.vector()[v2d[i+1+Nx]],"   A2(",i,")-A2(",i+1+Nx,") = ",A2.vector()[v2d[i]]-A2.vector()[v2d[i+1+Nx]])
-print("------------------------------------------------------------------------")
 
 
+#========================================================================================================================
 
-### Scatter plot to map discontinuity.
-#fig = plt.figure()                                                               
-#ax = fig.add_subplot(111, projection='3d')                                       
-#ax.scatter(dof_x, dof_y, disc_T.vector()[:], c='g', marker='.')                  
-#ax.scatter(dof_x, dof_y, disc_T1.vector()[:], c='b', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker.vector()[:], c='r', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker1.vector()[:], c='m', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()                                                                       
-#
-### Scatter plot to map discontinuity.
-#fig = plt.figure()                                                               
-#ax = fig.add_subplot(111, projection='3d')                                       
-#ax.scatter(dof_x, dof_y, disc_T1.vector()[:], c='b', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker.vector()[:], c='r', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker1.vector()[:], c='m', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()                                                                       
 
+#========================================================================================================================
 for tt in range(NN):
  print("============================================================")
  print("iteration number = ",tt)
@@ -310,24 +320,13 @@ for tt in range(NN):
  a21.vector()[:] = a21_up.vector()[:]
  t.vector()[:] = t_up.vector()[:] 
  t1.vector()[:] = t1_up.vector()[:] 
- for idx in range(len(t.vector()[:])) :
-  if t.vector()[idx] < 0-DOLFIN_EPS or t.vector()[idx] > 2*np.pi+DOLFIN_EPS:
-   #print("t(",idx,") = ",t.vector()[idx])
-   if idx in v2d[vertex_coord] :
-    t_array = t.vector()[:]
-    t_array[idx] = 2*np.pi
-    t.vector()[:] = t_array
-   else:
-    print("err--t(",idx,") = ",t.vector()[idx])
-    print("blw--t(",idx-1-Nx,") = ",t.vector()[idx-1-Nx])
-    print("top--t(",idx+1+Nx,") = ",t.vector()[idx+1+Nx])
- #if any(t.vector()[:] < 0-DOLFIN_EPS) or any(t.vector()[:] > 2*np.pi+DOLFIN_EPS):
- # print("============================================================")
- # print("before modding the previous output")
- # print(t_up.vector()[:])
- # print("============================================================")
- # print("after modding the previous output")
- # print(t.vector()[:])
+ if any(t.vector()[:] < 0) or any(t.vector()[:] > 2*np.pi):
+  print("============================================================")
+  print("before modding the previous output")
+  print(t_up.vector()[:])
+  print("============================================================")
+  print("after modding the previous output")
+  print(t.vector()[:])
  u.vector()[:] = u_up.vector()[:]
  u1.vector()[:] = u1_up.vector()[:]
  Fa1_vec = assemble(Fa1)
@@ -415,64 +414,54 @@ for tt in range(NN):
   
 
  ##modifying F_t
- for i in vertex_coord:
-  #Fa1_vec[v2d[i-1:i+1:1]] = Fa11_vec[v2d[i-1:i+1:1]]
-  #Fa2_vec[v2d[i-1:i+1:1]] = Fa21_vec[v2d[i-1:i+1:1]]
-  #Fu_vec[v2d[i-1:i+1:1]] = Fu1_vec[v2d[i-1:i+1:1]]
-  #Ft_vec[v2d[i-1:i+1:1]] = Ft1_vec[v2d[i-1:i+1:1]]
-  #Fa1_vec[v2d[i-1-Nx]] = Fa11_vec[v2d[i-1-Nx]]
-  Fa1_vec[v2d[i-1-Nx]] = Fa11_vec[v2d[i-1-Nx]]
+ for i in disc_node:
   Fa1_vec[v2d[i]] = Fa11_vec[v2d[i]]
-  Fa1_vec[v2d[i+1+Nx]] = Fa11_vec[v2d[i+1+Nx]]
-  Fa2_vec[v2d[i-1-Nx]] = Fa21_vec[v2d[i-1-Nx]]
   Fa2_vec[v2d[i]] = Fa21_vec[v2d[i]]
-  Fa2_vec[v2d[i+1+Nx]] = Fa21_vec[v2d[i+1+Nx]]
-  Fu_vec[v2d[i-1-Nx]] = Fu1_vec[v2d[i-1-Nx]]
   Fu_vec[v2d[i]] = Fu1_vec[v2d[i]]
-  Fu_vec[v2d[i+1+Nx]] = Fu1_vec[v2d[i+1+Nx]]
-  Ft_vec[v2d[i-1-Nx]] = Ft1_vec[v2d[i-1-Nx]]
   Ft_vec[v2d[i]] = Ft1_vec[v2d[i]]
-  Ft_vec[v2d[i+1+Nx]] = Ft1_vec[v2d[i+1+Nx]]
+ for i in disc_above:
+  Fa1_vec[i] = Fa11_vec[i]
+  Fa2_vec[i] = Fa21_vec[i]
+  Fu_vec[i] = Fu1_vec[i]
+  Ft_vec[i] = Ft1_vec[i]
+ for i in disc_below:
+  Fa1_vec[i] = Fa11_vec[i]
+  Fa2_vec[i] = Fa21_vec[i]
+  Fu_vec[i] = Fu1_vec[i]
+  Ft_vec[i] = Ft1_vec[i]
     
 
  a1_up.vector()[:] = a1.vector()[:] - gamma*Fa1_vec[:]
  a2_up.vector()[:] = a2.vector()[:] - gamma*Fa2_vec[:]
  t_up.vector()[:] = t.vector()[:] - gamma*Ft_vec[:]
- #t1_up.vector()[:] = t1.vector()[:] - gamma*Ft1_vec[:]
+ t1_up.vector()[:] = t1.vector()[:] - gamma*Ft1_vec[:]
  u_up.vector()[:] = u.vector()[:] - gamma*Fu_vec[:]
-
- t1_array = t1_up.vector()[:]
- for i in range(0,len(t1_array)):
-  if 0 <= i <= np.pi:
-   t1_array[i] = t1_array[i] + 2*np.pi
- t1_up.vector()[:] = t1_array
-
- temp_a1.vector()[:] = a1_up.vector()[:]
- temp_a2.vector()[:] = a2_up.vector()[:]
- temp_t.vector()[:] =  t_up.vector()[:]
- temp_t1.vector()[:] = t1_up.vector()[:]
- temp_u.vector()[:] =  u_up.vector()[:]
-
- #c = plot(temp_t)
- #plt.title(r"theta$(x)",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
- #c = plot(temp_t1)
- #plt.title(r"theta1$(x)",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
- #c = plot(temp_u)
- #plt.title(r"u(x)$",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
- #c = plot(temp_a1)
- #plt.title(r"a1(x)$",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
- #c = plot(temp_a2)
- #plt.title(r"a2(x)$",fontsize=26)
- #plt.colorbar(c)
- #plt.show()
+ temp_a1.vector()[:] = Fa1_vec[:]
+ temp_a2.vector()[:] = Fa2_vec[:]
+ temp_t.vector()[:] = Ft_vec[:]
+ temp_t1.vector()[:] = Ft1_vec[:]
+ temp_u.vector()[:] = Fu_vec[:]
+ 
+ c = plot(temp_t)
+ plt.title(r"$F_{\theta}$(x)",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_t1)
+ plt.title(r"$F_{\theta1}$(x)",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_u)
+ plt.title(r"$F_{u}(x)$",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_a1)
+ plt.title(r"$F_{a1}(x)$",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
+ c = plot(temp_a2)
+ plt.title(r"$F_{a2}(x)$",fontsize=26)
+ plt.colorbar(c)
+ plt.show()
 
  #print(Fa1_vec.get_local()) # prints the vector.
  #print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
@@ -514,47 +503,47 @@ pie = assemble((1/(lx*ly))*((1-u**2)**2/2 + (1/kappa**2)*inner(grad(u), grad(u))
 
 
 print("================output of code========================")
-print("Energy density is", pie)
-print("gamma = ", gamma)
-print("kappa = ", kappa)
-print("lx = ", lx)
-print("ly = ", ly)
+#print("Energy density is", pie)
+#print("gamma = ", gamma)
+#print("kappa = ", kappa)
+#print("lx = ", lx)
+#print("ly = ", ly)
 print("Nx = ", Nx)
 print("Ny = ", Ny)
-print("NN = ", NN)
-print("H = ", H)
-print("tol = ", tol, ", ", float(tol_test))
-print("read_in = ", read_in)
+#print("NN = ", NN)
+#print("H = ", H)
+#print("tol = ", tol, ", ", float(tol_test))
+#print("read_in = ", read_in)
 
-c = plot(U)
-plt.title(r"$U(x)$",fontsize=26)
-plt.colorbar(c)
-plt.show()
-c = plot(T)
-plt.title(r"$T(x)$",fontsize=26)
-plt.colorbar(c)
-plt.show()
-c = plot(T1)
-plt.title(r"$T1(x)$",fontsize=26)
-plt.colorbar(c)
-plt.show()
+#c = plot(U)
+#plt.title(r"$U(x)$",fontsize=26)
+#plt.colorbar(c)
+#plt.show()
+#c = plot(T)
+#plt.title(r"$T(x)$",fontsize=26)
+#plt.colorbar(c)
+#plt.show()
+#c = plot(T1)
+#plt.title(r"$T1(x)$",fontsize=26)
+#plt.colorbar(c)
+#plt.show()
 
-c = plot(u)
-plt.title(r"$u(x)$",fontsize=26)
-plt.colorbar(c)
-plt.show()
-c = plot(a1)
-plt.title(r"$A_1(x)$",fontsize=26)
-plt.colorbar(c)
-plt.show()
-c = plot(a2)
-plt.title(r"$A_2(x)$",fontsize=26)
-plt.colorbar(c)
-plt.show()
-c = plot(t)
-plt.title(r"$\theta(x)$",fontsize=26)
-plt.colorbar(c)
-plt.show()
+#c = plot(u)
+#plt.title(r"$u(x)$",fontsize=26)
+#plt.colorbar(c)
+#plt.show()
+#c = plot(a1)
+#plt.title(r"$A_1(x)$",fontsize=26)
+#plt.colorbar(c)
+#plt.show()
+#c = plot(a2)
+#plt.title(r"$A_2(x)$",fontsize=26)
+#plt.colorbar(c)
+#plt.show()
+#c = plot(t)
+#plt.title(r"$\theta(x)$",fontsize=26)
+#plt.colorbar(c)
+#plt.show()
 
 t1 = time.time()
 

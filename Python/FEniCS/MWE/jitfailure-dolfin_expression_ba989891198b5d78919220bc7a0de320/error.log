@@ -1,0 +1,7 @@
+/var/folders/1g/ph21gtcx2bbd4j5d7qk2tnc00000gn/T/tmp1bwl1gzt/dolfin_expression_ba989891198b5d78919220bc7a0de320.cpp:63:48: error: use of undeclared identifier 'np'
+          values[0] = atan2(-0.5*(x[0]-0.5*lx)+np.sqrt(3)*0.5*(x[1]-0.5*ly), 0.5*(x[1]-0.5*ly)+np.sqrt(3)*0.5*(x[0]-0.5*lx);
+                                               ^
+/var/folders/1g/ph21gtcx2bbd4j5d7qk2tnc00000gn/T/tmp1bwl1gzt/dolfin_expression_ba989891198b5d78919220bc7a0de320.cpp:63:96: error: use of undeclared identifier 'np'
+          values[0] = atan2(-0.5*(x[0]-0.5*lx)+np.sqrt(3)*0.5*(x[1]-0.5*ly), 0.5*(x[1]-0.5*ly)+np.sqrt(3)*0.5*(x[0]-0.5*lx);
+                                                                                               ^
+2 errors generated.

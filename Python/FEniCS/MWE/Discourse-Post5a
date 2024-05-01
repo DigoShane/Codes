@@ -1,3 +1,23 @@
+**Version**:-
+DOLFIN version: 2019.1.0 run using Conda
+
+**Motivation**:-
+I have a code where I have to evolve a discontinuous variable ($\theta$). At each step, I will evolve this variable via gradient descent,
+$\theta_{t+1}=\theta_t-\lambda\dfrac{\partial E^t}{\partial\theta},$
+where $\lambda\approx0.01$ is the learning rate.
+The variable $\theta$ is multivalued, but for my purposes, I want to restrict it to $[0,2\pi)$. Note that the actual $\theta$ being multivalued-continuous, the gradient is well defined. But restricting it to $[0,2\pi)$, means that we get a "fake" gradient at the 'line' of discontinuity. Thus, I want to modify $\dfrac{\partial E^t}{\partial\theta}$ near the discontinuity. This is the reason I need to keep track of this discontinuity. 
+
+**Approach**:-
+My current approach was to read in the function, return the values at the nodes, and test which nodal values are 0 or 2\pi. However, this approach fails since it does not return any nodes at all. Please check the MWE below.
+
+**MWE**:-
+The domain is a rectangle $l_x\times l_y$, which i discretize into $N_x$ by $N_y$. I provide an expression $T$ that is supposed to be the read-in value of $\theta$; this is discontinuous. I define Tarray as the array of nodal values for the function $T$. I define two functions Marker and Marker1 which I use to create mark the curve (for me nodes) of discontinuity. I initialize them to $-\pi$, get their nodal values in Marker_array and Marker_array1. I then loop over the nodal values of T to check if any one of them is equal to $0$ or $2\pi$; if there are, then I modify the corresponding value of Marker(1) to $2\pi$. To test if there are nodal values equal to $0$ or $2\pi$, I use the "np.where" command, and it doesn't return anything. Finally, I plot $\theta$ (colormap), and I plot the nodal values of Marker, Marker1 and T. Marker and Marker 1 should be discontinuous and should mark the "line" (here) node of discontinuity.
+
+The scatter plot is to help me visualize the problem. Honestly, for this MWE, you can run the code till
+*print("location of 0's", np.where( np.array(Tarray) == 0))*
+*print("location of 2*pi's", np.where( np.array(Tarray) == 2*np.pi))*
+
+```
 import dolfin
 print(f"DOLFIN version: {dolfin.__version__}")
 from dolfin import *
@@ -17,8 +37,6 @@ lx = float(1.0)
 ly = float(1.0)
 Nx = int(40)
 Ny = int(40)
-#c_r = float(0.1)
-#Ref_No = int(input("Refinement number? -->"))
 
 
 #Create mesh and define function space
@@ -78,5 +96,7 @@ ax.scatter(dof_x, dof_y, Marker1.vector()[:], c='m', marker='.')
 plt.xlabel("x")
 plt.ylabel("y")
 plt.show()                                                                       
+```
 
-
+**Help Request**:-
+Can you help me write code that calculates the "curve"/"line" of discontinuity from the input function? I feel the approach via nodal values failed, but it will work if I have an approach that looks at functional values. Once I know the curve, I will be able to proceed with identifying the nodes lying on either side of it so that I can make some modifications there. 

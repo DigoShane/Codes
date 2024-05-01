@@ -1,0 +1,7 @@
+/var/folders/1g/ph21gtcx2bbd4j5d7qk2tnc00000gn/T/tmpen7pt_se/dolfin_expression_11e51f339a16e207bcc728b59024d135.cpp:64:108: error: expected ')'
+          values[0] = atan2(-0.5*(x[0]-0.5*lx)+rt*0.5*(x[1]-0.5*ly), 0.5*(x[1]-0.5*ly)+rt*0.5*(x[0]-0.5*lx);
+                                                                                                           ^
+/var/folders/1g/ph21gtcx2bbd4j5d7qk2tnc00000gn/T/tmpen7pt_se/dolfin_expression_11e51f339a16e207bcc728b59024d135.cpp:64:28: note: to match this '('
+          values[0] = atan2(-0.5*(x[0]-0.5*lx)+rt*0.5*(x[1]-0.5*ly), 0.5*(x[1]-0.5*ly)+rt*0.5*(x[0]-0.5*lx);
+                           ^
+1 error generated.
