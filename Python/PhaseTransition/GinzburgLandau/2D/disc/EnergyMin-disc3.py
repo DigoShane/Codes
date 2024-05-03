@@ -30,8 +30,10 @@ np.set_printoptions(threshold=sys.maxsize)
 print("================input to code========================")
 pord = int(1)# degree of polynmomials used for FEA
 kappa = Constant(2.0)
-lx = float(input("lx? --> "))
-ly = float(input("ly? --> "))
+#lx = float(input("lx? --> "))
+#ly = float(input("ly? --> "))
+lx = float(1.0)
+ly = float(1.0)
 print("Code replaces odd no. with next highest even no.")
 Nx = int(input("Nx? --> "))
 Ny = int(input("Ny? --> "))
@@ -43,7 +45,8 @@ H = Constant(0.23);
 tol = float(0.000001)
 read_in = int(0)
 c_r = float(0.1)
-Ref_No = int(input("Refinement number? -->"))
+Ref_No = int(1)
+#Ref_No = int(input("Refinement number? -->"))
 
 
 #Create mesh and define function space
@@ -413,7 +416,7 @@ for tt in range(NN):
  #print("------------------------------------------------------------------------") 
   
 
- ##modifying F_t
+ ##modifying F_\cdot
  for i in disc_node:
   Fa1_vec[v2d[i]] = Fa11_vec[v2d[i]]
   Fa2_vec[v2d[i]] = Fa21_vec[v2d[i]]
