@@ -1,4 +1,5 @@
 #Here we solve the 2D Ginzbug Landau problem with an applied magnetic field.
+
 #Here we want to use Energy minimization method. We start off with Gradient Descent.
 #HEre a1 is \ve{A}\cdot e_1, a2 is \ve{A}\cdot e_2, u is u. However, \theta=t
 #------------------------------------------------------------------------------------------------------
@@ -13,7 +14,7 @@
 #    Instead of sampling noise from a sphere, I am sampling from a box.
 # 3. Momentum method
 #    v_{t+1} = \tau v_t - \eta \nabla f(x_t)
-#    x_{t+1} = x_t + v_{t+1}
+i#    x_{t+1} = x_t + v_{t+1}
 # 2. Nesterov Momentum 
 #    v_{t+1} = \tau v_t - \eta \nabla f(x_t+\tau v_t)
 #    x_{t+1} = x_t + v_{t+1}
@@ -62,7 +63,7 @@ V = FunctionSpace(mesh, "Lagrange", 2)#This is for ExtFile
 
 # Define functions
 a1 = Function(V)
-a2 = Function(V)
+a2 = Function(V)s to do wrt this code.
 t = Function(V)
 u = Function(V)
 a1_up = Function(V)

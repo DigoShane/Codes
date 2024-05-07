@@ -34,21 +34,25 @@ pord = int(1)# degree of polynmomials used for FEA
 kappa = Constant(2.0)
 #lx = float(input("lx? --> "))
 #ly = float(input("ly? --> "))
-lx = float(1.0)
-ly = float(1.0)
+lx = float(10.0)
+ly = float(10.0)
 print("Code replaces odd no. with next highest even no.")
-Nx = int(20) #int(input("Nx? --> "))
-Ny = int(20) #int(input("Ny? --> "))
+Nx = int(10*lx/float(kappa)) #int(input("Nx? --> "))
+Ny = int(10*ly/float(kappa)) #int(input("Ny? --> "))
 Nx = int(2*np.ceil(Nx/2))
 Ny = int(2*np.ceil(Ny/2))
 gamma = float(0.01) # Learning rate.
 NN = int(input('Number of iterations? -->')) # Number of iterations
 H = Constant(0.23);
 tol = float(0.000001)
-read_in = int(1)
-c_r = float(0.1)
+read_in = int(1) # 1 to red in o/p of last iteration, 0 for initial condiiton provided here.
+c_r = float(kappa)
 Ref_No = int(1)
 #Ref_No = int(input("Refinement number? -->"))
+random_no_method = int(input("0 for Gradient Descent, 1 for Random Stochastic Gradient Descent, 2 for Nesterov, 3 for normal momentum --> "))
+tau = float(input("tau? --> ")) # stochastic parameter
+if tau < 0 or tau > 1:
+  sys.exit("tau cannot be negative")
 
 
 #Create mesh and define function space
@@ -101,15 +105,6 @@ t_up = Function(V)
 t1_up = Function(V)
 u_up = Function(V)
 u1_up = Function(V)
-#Temp functions to store the frechet derivatives
-temp_a1 = Function(V)
-temp_a11 = Function(V)
-temp_a2 = Function(V)
-temp_a21 = Function(V)
-temp_t = Function(V)
-temp_t1 = Function(V)
-temp_u = Function(V)
-temp_u1 = Function(V)
 
 def curl(a1,a2):
     return a2.dx(0) - a1.dx(1)
@@ -193,17 +188,8 @@ t_up.vector()[:] = T.vector()[:]
 t1_up.vector()[:] = T1.vector()[:]
 u_up.vector()[:] = U.vector()[:]
 
-##Plot mesh
-#plot(mesh)
-#plt.show()
-
 ##========================================================================================================================
-##Creating a vector to mark the discontinuity.
-Marker = interpolate( Expression('0', degree=pord), V)
-Marker1 = interpolate( Expression('3*pie', pie=np.pi, degree=pord), V)
-
-Marker_array = Marker.vector()[:]
-Marker_array1 = Marker1.vector()[:]
+##Creating a list to store nodes of discontinuity.
 xcoord = mesh.coordinates()
 v2d = vertex_to_dof_map(V)
 d2v = dof_to_vertex_map(V)
@@ -212,18 +198,9 @@ disc_node1 = []
 
 for i,xx in enumerate(xcoord):
  if xx[0] > 0.5*lx and xx[1] == 0.5*ly: # in the right half and along the x2 = 0.5*ly axis.
-  #print("on the discontinuity",xx)
-  #print("index no. is ",i)
-  Marker_array[v2d[i]] = np.pi
   disc_node.append(i)
  if xx[0] < 0.5*lx and xx[1] == 0.5*ly: # in the left half and along the x2 = 0.5*ly axis.
-  #print("on the discontinuity1",xx)
-  #print("index1 no. is ",i)
-  Marker_array1[v2d[i]] = np.pi
   disc_node1.append(i)
-
-Marker.vector()[:] = Marker_array
-Marker1.vector()[:] = Marker_array1
 
 n = V.dim()                                                                      
 d = mesh.geometry().dim()                                                        
@@ -237,110 +214,26 @@ disc_T1 = interpolate( T1, V)
 print("disc_node = ", disc_node)
 print("=======================================================")
 
-#### Scatter plot to map discontinuity.
-#fig = plt.figure()                                                              
-#ax = fig.add_subplot(111, projection='3d')                                      
-#ax.scatter(dof_x, dof_y, disc_T.vector()[:], c='g', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker.vector()[:], c='r', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker1.vector()[:], c='m', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()                                                                      
-#
-#### Scatter plot to map discontinuity.
-#fig = plt.figure()                                                              
-#ax = fig.add_subplot(111, projection='3d')                                      
-#ax.scatter(dof_x, dof_y, disc_T1.vector()[:], c='b', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker.vector()[:], c='r', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker1.vector()[:], c='m', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()                                                                      
-##========================================================================================================================
-
-
-
-
 #========================================================================================================================
 ## Determining the nodes near the discontinuity.
-Marker_above = interpolate( Expression('0', degree=pord), V)
-Marker_below = interpolate( Expression('0', degree=pord), V)
-Marker_above_array = Marker_above.vector()[:]
-Marker_below_array = Marker_below.vector()[:]
 disc_above = []
 disc_below = []
-dof_coordinates1 = V.tabulate_dof_coordinates().reshape(n,d)                      
+dof_coordinates1 = V.tabulate_dof_coordinates()
 
 ##Marking the nodes near the discontinuity.
 print("Marking the nodes near the discontinuity.")
 for j,yy in enumerate(dof_coordinates1):
  if yy[1] > 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 > c_r**2 and abs(yy[1]-0.5*ly) <= ly/Ny + DOLFIN_EPS: # disc nodes above x_2=0.5*ly and right of the core.
   disc_above.append(j)
-  Marker_above_array[j] = np.pi
  elif yy[1] > 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 < c_r**2  and abs(yy[1]-0.5*ly) <= ly/Ny/2**(Ref_No)+DOLFIN_EPS: # discnodes above inside core
   disc_above.append(j)
-  Marker_above_array[j] = np.pi
  elif yy[1] < 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 > c_r**2 and abs(yy[1]-0.5*ly) <= ly/Ny + DOLFIN_EPS: # disc nodes below x_2=0.5*ly and right of the core.
   disc_below.append(j)
-  Marker_below_array[j] = np.pi
  elif yy[1] < 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 < c_r**2 and abs(yy[1]-0.5*ly) <= ly/Ny/2**(Ref_No)+DOLFIN_EPS: # discnodes above&inside core
   disc_below.append(j)
-  Marker_below_array[j] = np.pi
-
-Marker_above.vector()[:] = Marker_above_array
-Marker_below.vector()[:] = Marker_below_array
-
-### Scatter plot to map nodes near
-#fig = plt.figure()                                                              
-#ax = fig.add_subplot(111, projection='3d')                                      
-#ax.scatter(dof_x, dof_y, Marker.vector()[:], c='g', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker_above.vector()[:], c='r', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()    
-#
-### Scatter plot to map nodes near
-#fig = plt.figure()                                                              
-#ax = fig.add_subplot(111, projection='3d')                                      
-#ax.scatter(dof_x, dof_y, Marker.vector()[:], c='g', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker_below.vector()[:], c='m', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()    
-
-
-print("disc_above = ", disc_above)
-print("=======================================================")
-print("disc_below = ", disc_below)
-print("=======================================================")
-
-#========================================================================================================================
-###Checking what the corrects nodes are wrt the function.
-#uxy = interpolate( Expression('x[0]+x[1]', degree=pord), V)
-#uxy_array = uxy.vector()[:]
-##uxy_array[v2d[disc_node]] = -1
-##uxy_array[v2d[disc_node1]] = -1
-##uxy_array[disc_above] = -1
-##uxy_array[disc_below] = -1
-#uxy.vector()[:] = uxy_array
-#
-### Scatter plot to map nodes near
-#fig = plt.figure()                                                              
-#ax = fig.add_subplot(111, projection='3d')                                      
-#ax.scatter(dof_x, dof_y, uxy.vector()[:], c='g', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker.vector()[:], c='r', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker1.vector()[:], c='r', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker_above.vector()[:], c='r', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker_below.vector()[:], c='r', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()    
 
 #========================================================================================================================
 for tt in range(NN):
- #print("============================================================")
- #print("iteration number = ",tt)
- #print("============================================================")
  a1.vector()[:] = a1_up.vector()[:]
  a11.vector()[:] = a11_up.vector()[:]
  a2.vector()[:] = a2_up.vector()[:]
@@ -352,21 +245,9 @@ for tt in range(NN):
 
  #Checking where the function crosses 0 and 2\pi.
  t_array = np.asarray(t.vector()[:])
- #print("less than 0", t_array[np.where(t_array<=0)])
- #print("greater than 2*pi", t_array[np.where(t_array>=2*np.pi)])
- #Tlt = d2v[np.where(t_array<=0)]
- #Tgt = d2v[np.where(t_array>=2*np.pi)]
  t_array[np.where(t_array<=0)] = 0
  t_array[np.where(t_array>=2*np.pi)] = 2*np.pi
  t.vector()[:] = t_array
- #print("Nodes where t < 0",Tlt)
- #print("Nodes where t > 2*pi",Tgt)
- #print("values where t < 0",t.vector()[v2d[Tlt]])
- #print("values where t > 2*pi",t.vector()[v2d[Tgt]])
- #print("value above disc is ",t.vector()[disc_above])
- #print("---------------------------------------------")
- #print("value below disc is ",t.vector()[disc_below])
-
 
  Fa1_vec = assemble(Fa1)
  Fa11_vec = assemble(Fa11)
@@ -376,35 +257,6 @@ for tt in range(NN):
  Ft1_vec = assemble(Ft1)
  Fu_vec = assemble(Fu)
  Fu1_vec = assemble(Fu1)
-
- temp_a1.vector()[:] = Fa1_vec[:]
- temp_a2.vector()[:] = Fa2_vec[:]
- temp_t.vector()[:] = Ft_vec[:]
- temp_t1.vector()[:] = Ft1_vec[:]
- temp_u.vector()[:] = Fu_vec[:]
- 
- c = plot(temp_t)
- plt.title(r"$F_{\theta}$(x)--before",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_t1)
- plt.title(r"$F_{\theta1}$(x)--before",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_u)
- plt.title(r"$F_{u}(x)$--before",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a1)
- plt.title(r"$F_{a1}(x)$--before",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a2)
- plt.title(r"$F_{a2}(x)$--before",fontsize=26)
- plt.colorbar(c)
- plt.show()
-
- 
 
  ##modifying F_\cdot
  for i in disc_node:
@@ -429,6 +281,46 @@ for tt in range(NN):
  t_up.vector()[:] = t.vector()[:] - gamma*Ft_vec[:]
  u_up.vector()[:] = u.vector()[:] - gamma*Fu_vec[:]
 
+
+    
+ if tt == 0: # For the first iteration, we generate random vec for momentum.
+  ma1_vec = [0.0 for _ in range(len(Fa1_vec))] 
+  ma2_vec = [0.0 for _ in range(len(Fa2_vec))] 
+  mt_vec = [0.0 for _ in range(len(Ft_vec))] 
+  mu_vec = [0.0 for _ in range(len(Fu_vec))]
+ if random_no_method == 0: # Gradient Descent.
+  a1_up.vector()[:] = a1.vector()[:] - gamma*Fa1_vec[:]
+  a2_up.vector()[:] = a2.vector()[:] - gamma*Fa2_vec[:]
+  t_up.vector()[:] = t.vector()[:] - gamma*Ft_vec[:]
+  u_up.vector()[:] = u.vector()[:] - gamma*Fu_vec[:]
+ elif random_no_method == 1: # Random Stochastic Gradient Descent.
+  ma1_vec = [random.uniform(0,tau) for _ in range(len(Fa1_vec))] # return a random vector of len Fa1_vec each elemnt less than tau. 
+  ma2_vec = [random.uniform(0,tau) for _ in range(len(Fa2_vec))] 
+  mt_vec = [random.uniform(0,tau) for _ in range(len(Ft_vec))] 
+  mu_vec = [random.uniform(0,tau) for _ in range(len(Fu_vec))]
+  a1_up.vector()[:] = a1.vector()[:] - gamma*(Fa1_vec[:] + ma1_vec)
+  a2_up.vector()[:] = a2.vector()[:] - gamma*(Fa2_vec[:] + ma2_vec)
+  t_up.vector()[:] = t.vector()[:] - gamma*(Ft_vec[:] + mt_vec)
+  u_up.vector()[:] = u.vector()[:] - gamma*(Fu_vec[:] + mu_vec)
+ elif random_no_method == 3: #normal momentum,
+  #print("tt=",tt," type of vec =",type(ma1_vec))
+  ma1_vec = [ii * tau for ii in ma1_vec]
+  ma1_vec[:] = ma1_vec[:] - gamma*Fa1_vec[:] 
+  a1_up.vector()[:] = a1.vector()[:] + ma1_vec
+  ma2_vec = [ii * tau for ii in ma2_vec]
+  ma2_vec[:] = ma2_vec[:] - gamma*Fa2_vec[:] 
+  a2_up.vector()[:] = a2.vector()[:] + ma2_vec
+  mt_vec = [ii * tau for ii in mt_vec]
+  mt_vec[:] = mt_vec[:] - gamma*Ft_vec[:] 
+  t_up.vector()[:] = t.vector()[:] + mt_vec
+  mu_vec = [ii * tau for ii in mu_vec]
+  mu_vec[:] = mu_vec[:] - gamma*Fu_vec[:] 
+  u_up.vector()[:] = u.vector()[:] + mu_vec
+ elif random_no_method == 2: #Nesterov.
+   sys.exit("Not ready yet.")
+ else:
+  sys.exit("Not a valid input for random_no_method.")
+
  # Obtaining t1 from t.
  t1_array = t1_up.vector()[:]
  t1_array = t_up.vector()[:]
@@ -437,33 +329,7 @@ for tt in range(NN):
    t1_array[i] = t1_array[i] + 2*np.pi
  t1_up.vector()[:] = t1_array
 
- temp_a1.vector()[:] = Fa1_vec[:]
- temp_a2.vector()[:] = Fa2_vec[:]
- temp_t.vector()[:] = Ft_vec[:]
- temp_t1.vector()[:] = Ft1_vec[:]
- temp_u.vector()[:] = Fu_vec[:]
  
- c = plot(temp_t)
- plt.title(r"$F_{\theta}$(x)--after",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_t1)
- plt.title(r"$F_{\theta1}$(x)--after",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_u)
- plt.title(r"$F_{u}(x)$--after",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a1)
- plt.title(r"$F_{a1}(x)$--after",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a2)
- plt.title(r"$F_{a2}(x)$--after",fontsize=26)
- plt.colorbar(c)
- plt.show()
-
  #print(Fa1_vec.get_local()) # prints the vector.
  #print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
  tol_test = np.linalg.norm(np.asarray(Fa1_vec.get_local()))\
@@ -521,19 +387,6 @@ print("H = ", float(H))
 print("tol = ", tol, ", ", float(tol_test))
 print("read_in = ", read_in)
 
-#c = plot(U)
-#plt.title(r"$U(x)$",fontsize=26)
-#plt.colorbar(c)
-#plt.show()
-#c = plot(T)
-#plt.title(r"$T(x)$",fontsize=26)
-#plt.colorbar(c)
-#plt.show()
-#c = plot(T1)
-#plt.title(r"$T1(x)$",fontsize=26)
-#plt.colorbar(c)
-#plt.show()
-
 c = plot(u)
 plt.title(r"$u(x)$",fontsize=26)
 plt.colorbar(c)
@@ -554,6 +407,3 @@ plt.show()
 time1 = time.time()
 
 print("time taken for code to run = ", time1-time0)
-
-
-
