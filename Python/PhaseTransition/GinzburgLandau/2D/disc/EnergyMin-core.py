@@ -197,144 +197,21 @@ u_up.vector()[:] = U.vector()[:]
 #plot(mesh)
 #plt.show()
 
-##========================================================================================================================
-##Creating a vector to mark the discontinuity.
-Marker = interpolate( Expression('0', degree=pord), V)
-Marker1 = interpolate( Expression('3*pie', pie=np.pi, degree=pord), V)
-
-Marker_array = Marker.vector()[:]
-Marker_array1 = Marker1.vector()[:]
+#========================================================================================================================
+## Determining the nodes to change
 xcoord = mesh.coordinates()
 v2d = vertex_to_dof_map(V)
 d2v = dof_to_vertex_map(V)
 disc_node = []
-disc_node1 = []
-
-for i,xx in enumerate(xcoord):
- if xx[0] > 0.5*lx and xx[1] == 0.5*ly: # in the right half and along the x2 = 0.5*ly axis.
-  #print("on the discontinuity",xx)
-  #print("index no. is ",i)
-  Marker_array[v2d[i]] = np.pi
-  disc_node.append(i)
- if xx[0] < 0.5*lx and xx[1] == 0.5*ly: # in the left half and along the x2 = 0.5*ly axis.
-  #print("on the discontinuity1",xx)
-  #print("index1 no. is ",i)
-  Marker_array1[v2d[i]] = np.pi
-  disc_node1.append(i)
-
-Marker.vector()[:] = Marker_array
-Marker1.vector()[:] = Marker_array1
-
 n = V.dim()                                                                      
 d = mesh.geometry().dim()                                                        
-dof_coordinates = V.tabulate_dof_coordinates().reshape(n,d)                      
-dof_coordinates.resize((n, d))                                                  
-dof_x = dof_coordinates[:, 0]                                                    
-dof_y = dof_coordinates[:, 1]                                                    
-disc_T = interpolate( T, V)
-disc_T1 = interpolate( T1, V)
-
-print("disc_node = ", disc_node)
-print("=======================================================")
-
-#### Scatter plot to map discontinuity.
-#fig = plt.figure()                                                              
-#ax = fig.add_subplot(111, projection='3d')                                      
-#ax.scatter(dof_x, dof_y, disc_T.vector()[:], c='g', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker.vector()[:], c='r', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker1.vector()[:], c='m', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()                                                                      
-#
-#### Scatter plot to map discontinuity.
-#fig = plt.figure()                                                              
-#ax = fig.add_subplot(111, projection='3d')                                      
-#ax.scatter(dof_x, dof_y, disc_T1.vector()[:], c='b', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker.vector()[:], c='r', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker1.vector()[:], c='m', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()                                                                      
-##========================================================================================================================
-
-
-
-
-#========================================================================================================================
-## Determining the nodes near the discontinuity.
-Marker_above = interpolate( Expression('0', degree=pord), V)
-Marker_below = interpolate( Expression('0', degree=pord), V)
-Marker_above_array = Marker_above.vector()[:]
-Marker_below_array = Marker_below.vector()[:]
-disc_above = []
-disc_below = []
-dof_coordinates1 = V.tabulate_dof_coordinates().reshape(n,d)                      
+dof_coordinates = V.tabulate_dof_coordinates()
 
 ##Marking the nodes near the discontinuity.
 print("Marking the nodes near the discontinuity.")
-for j,yy in enumerate(dof_coordinates1):
- if yy[1] > 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 > c_r**2 and abs(yy[1]-0.5*ly) <= ly/Ny + DOLFIN_EPS: # disc nodes above x_2=0.5*ly and right of the core.
-  disc_above.append(j)
-  Marker_above_array[j] = np.pi
- elif yy[1] > 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 < c_r**2  and abs(yy[1]-0.5*ly) <= ly/Ny/2**(Ref_No)+DOLFIN_EPS: # discnodes above inside core
-  disc_above.append(j)
-  Marker_above_array[j] = np.pi
- elif yy[1] < 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 > c_r**2 and abs(yy[1]-0.5*ly) <= ly/Ny + DOLFIN_EPS: # disc nodes below x_2=0.5*ly and right of the core.
-  disc_below.append(j)
-  Marker_below_array[j] = np.pi
- elif yy[1] < 0.5*ly and yy[0] > 0.5*lx and (yy[0]-0.5*lx)**2+(yy[1]-0.5*ly)**2 < c_r**2 and abs(yy[1]-0.5*ly) <= ly/Ny/2**(Ref_No)+DOLFIN_EPS: # discnodes above&inside core
-  disc_below.append(j)
-  Marker_below_array[j] = np.pi
-
-Marker_above.vector()[:] = Marker_above_array
-Marker_below.vector()[:] = Marker_below_array
-
-### Scatter plot to map nodes near
-#fig = plt.figure()                                                              
-#ax = fig.add_subplot(111, projection='3d')                                      
-#ax.scatter(dof_x, dof_y, Marker.vector()[:], c='g', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker_above.vector()[:], c='r', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()    
-#
-### Scatter plot to map nodes near
-#fig = plt.figure()                                                              
-#ax = fig.add_subplot(111, projection='3d')                                      
-#ax.scatter(dof_x, dof_y, Marker.vector()[:], c='g', marker='.')                  
-#ax.scatter(dof_x, dof_y, Marker_below.vector()[:], c='m', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()    
-
-
-print("disc_above = ", disc_above)
-print("=======================================================")
-print("disc_below = ", disc_below)
-print("=======================================================")
-
-#========================================================================================================================
-###Checking what the corrects nodes are wrt the function.
-#uxy = interpolate( Expression('x[0]+x[1]', degree=pord), V)
-#uxy_array = uxy.vector()[:]
-##uxy_array[v2d[disc_node]] = -1
-##uxy_array[v2d[disc_node1]] = -1
-##uxy_array[disc_above] = -1
-##uxy_array[disc_below] = -1
-#uxy.vector()[:] = uxy_array
-#
-### Scatter plot to map nodes near
-#fig = plt.figure()                                                              
-#ax = fig.add_subplot(111, projection='3d')                                      
-#ax.scatter(dof_x, dof_y, uxy.vector()[:], c='g', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker.vector()[:], c='r', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker1.vector()[:], c='r', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker_above.vector()[:], c='r', marker='.')                  
-##ax.scatter(dof_x, dof_y, Marker_below.vector()[:], c='r', marker='.')                  
-#plt.xlabel("x")
-#plt.ylabel("y")
-#plt.show()    
+for j,yy in enumerate(dof_coordinates):
+ if yy[0] > 0.5*lx : # nodes to the right of the core.
+  disc_node.append(j)
 
 #========================================================================================================================
 for tt in range(NN):
@@ -377,47 +254,37 @@ for tt in range(NN):
  Fu_vec = assemble(Fu)
  Fu1_vec = assemble(Fu1)
 
- temp_a1.vector()[:] = Fa1_vec[:]
- temp_a2.vector()[:] = Fa2_vec[:]
- temp_t.vector()[:] = Ft_vec[:]
- temp_t1.vector()[:] = Ft1_vec[:]
- temp_u.vector()[:] = Fu_vec[:]
- 
- c = plot(temp_t)
- plt.title(r"$F_{\theta}$(x)--before",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_t1)
- plt.title(r"$F_{\theta1}$(x)--before",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_u)
- plt.title(r"$F_{u}(x)$--before",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a1)
- plt.title(r"$F_{a1}(x)$--before",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a2)
- plt.title(r"$F_{a2}(x)$--before",fontsize=26)
- plt.colorbar(c)
- plt.show()
+ #temp_a1.vector()[:] = Fa1_vec[:]
+ #temp_a2.vector()[:] = Fa2_vec[:]
+ #temp_t.vector()[:] = Ft_vec[:]
+ #temp_t1.vector()[:] = Ft1_vec[:]
+ #temp_u.vector()[:] = Fu_vec[:]
+ #
+ #c = plot(temp_t)
+ #plt.title(r"$F_{\theta}$(x)--before",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_t1)
+ #plt.title(r"$F_{\theta1}$(x)--before",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_u)
+ #plt.title(r"$F_{u}(x)$--before",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_a1)
+ #plt.title(r"$F_{a1}(x)$--before",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_a2)
+ #plt.title(r"$F_{a2}(x)$--before",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
 
  
 
  ##modifying F_\cdot
  for i in disc_node:
-  Fa1_vec[v2d[i]] = Fa11_vec[v2d[i]]
-  Fa2_vec[v2d[i]] = Fa21_vec[v2d[i]]
-  Fu_vec[v2d[i]] = Fu1_vec[v2d[i]]
-  Ft_vec[v2d[i]] = Ft1_vec[v2d[i]]
- for i in disc_above:
-  Fa1_vec[i] = Fa11_vec[i]
-  Fa2_vec[i] = Fa21_vec[i]
-  Fu_vec[i] = Fu1_vec[i]
-  Ft_vec[i] = Ft1_vec[i]
- for i in disc_below:
   Fa1_vec[i] = Fa11_vec[i]
   Fa2_vec[i] = Fa21_vec[i]
   Fu_vec[i] = Fu1_vec[i]
@@ -437,32 +304,32 @@ for tt in range(NN):
    t1_array[i] = t1_array[i] + 2*np.pi
  t1_up.vector()[:] = t1_array
 
- temp_a1.vector()[:] = Fa1_vec[:]
- temp_a2.vector()[:] = Fa2_vec[:]
- temp_t.vector()[:] = Ft_vec[:]
- temp_t1.vector()[:] = Ft1_vec[:]
- temp_u.vector()[:] = Fu_vec[:]
- 
- c = plot(temp_t)
- plt.title(r"$F_{\theta}$(x)--after",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_t1)
- plt.title(r"$F_{\theta1}$(x)--after",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_u)
- plt.title(r"$F_{u}(x)$--after",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a1)
- plt.title(r"$F_{a1}(x)$--after",fontsize=26)
- plt.colorbar(c)
- plt.show()
- c = plot(temp_a2)
- plt.title(r"$F_{a2}(x)$--after",fontsize=26)
- plt.colorbar(c)
- plt.show()
+ #temp_a1.vector()[:] = Fa1_vec[:]
+ #temp_a2.vector()[:] = Fa2_vec[:]
+ #temp_t.vector()[:] = Ft_vec[:]
+ #temp_t1.vector()[:] = Ft1_vec[:]
+ #temp_u.vector()[:] = Fu_vec[:]
+ #
+ #c = plot(temp_t)
+ #plt.title(r"$F_{\theta}$(x)--after",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_t1)
+ #plt.title(r"$F_{\theta1}$(x)--after",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_u)
+ #plt.title(r"$F_{u}(x)$--after",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_a1)
+ #plt.title(r"$F_{a1}(x)$--after",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
+ #c = plot(temp_a2)
+ #plt.title(r"$F_{a2}(x)$--after",fontsize=26)
+ #plt.colorbar(c)
+ #plt.show()
 
  #print(Fa1_vec.get_local()) # prints the vector.
  #print(np.linalg.norm(np.asarray(Fa1_vec.get_local()))) # prints the vector's norm.
